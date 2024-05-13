@@ -1,6 +1,11 @@
 # ffmpeg-win-arm64
 FFmpeg builds for Windows ARM64
 
+### Releases
+See [releases](https://github.com/tordona/ffmpeg-win-arm64/releases) section
+
+### Builds
+There are a few variants offered. The essentials build variant contains commonly used libraries, whereas the full build variant also contains most of the remainder. See the libraries section for a list. All variants contain all internal components available for Windows. If you're downloading a package to support features in a program like Shotcut, the release essentials static build is sufficient.
 
 ---
 
