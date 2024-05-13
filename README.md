@@ -15,7 +15,7 @@ additional libraries in full build
 libraries not yet supported  
 ```libcodec2 libdavs2 libflite liblensfun librist libuavs3d libxavs2 libxevd libxeve```
 
-hardware-support libraries in all builds
+hardware-support libraries in all builds  
 ```amf d3d11va d3d12va dxva2 libvpl vaapi```
 
 ---
