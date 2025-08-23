@@ -29,7 +29,6 @@ liblensfun
 liboapv
 libquirc
 libuavs3d
-libvvenc
 libxavs2
 `
 
