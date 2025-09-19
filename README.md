@@ -34,7 +34,7 @@ libxavs2
 
 hardware-support libraries in all builds  
 `
-amf d3d11va d3d12va dxva2 libvpl vaapi
+amf d3d11va d3d12va dxva2 vaapi
 `
 
 ---
