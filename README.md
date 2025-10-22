@@ -1,19 +1,17 @@
 # ffmpeg-win-arm64
 FFmpeg builds for Windows ARM64
 
-### Releases
+## Releases
 https://github.com/tordona/ffmpeg-win-arm64/releases/tag/8.0
 
 https://github.com/tordona/ffmpeg-win-arm64/releases/tag/7.1.2
 
 See [releases](https://github.com/tordona/ffmpeg-win-arm64/releases) section for older or pre-releases
 
-### Builds
+## Builds
 There are a few variants offered. The essentials build variant contains commonly used libraries, whereas the full build variant also contains most of the remainder. See the libraries section for a list. All variants contain all internal components available for Windows. If you're downloading a package to support features in a program like Shotcut or Adacity, the essentials shared build is sufficient.
 
----
-
-### Libraries
+## Libraries
 
 libraries in essentials build  
 `
@@ -40,8 +38,15 @@ hardware-support libraries in all builds
 amf d3d11va d3d12va dxva2 vaapi
 `
 
----
+## Compilation 
 
-##### Links
-Essential and Full builds are inspired by [https://www.gyan.dev/ffmpeg/builds/](https://www.gyan.dev/ffmpeg/builds/).  
-Visit for all other Windows x64 FFmpeg variants.
+* Windows 11 24H2 LTSC
+* Lenovo IdeaPad 5x
+* ThinkPad X13s Gen 1
+* [MSYS 2](https://www.msys2.org)
+* [Additional MSYS PKGBUILDs](https://github.com/tordona/MINGW-packages)
+
+---
+### Links
+Essential and Full builds are inspired by [https://www.gyan.dev/ffmpeg/builds/](https://www.gyan.dev/ffmpeg/builds/)  
+Visit for all other Windows x64 FFmpeg variants
