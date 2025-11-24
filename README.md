@@ -2,9 +2,9 @@
 FFmpeg builds for Windows ARM64
 
 ## Releases
-https://github.com/tordona/ffmpeg-win-arm64/releases/tag/8.0
+https://github.com/tordona/ffmpeg-win-arm64/releases/tag/8.0.1
 
-https://github.com/tordona/ffmpeg-win-arm64/releases/tag/7.1.2
+https://github.com/tordona/ffmpeg-win-arm64/releases/tag/7.1.3
 
 See [releases](https://github.com/tordona/ffmpeg-win-arm64/releases) section for older or pre-releases
 
