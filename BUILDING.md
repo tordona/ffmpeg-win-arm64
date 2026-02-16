@@ -1,5 +1,3 @@
-[![FFmpeg Win-ARM64 Auto-Builds Test](https://github.com/tordona/ffmpeg-win-arm64-test/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/tordona/ffmpeg-win-arm64-test/actions/workflows/main.yml)
-
 ## Compiling FFmpeg for Windows using MSYS2 Environment  
 This is a general walk-through for compiling a local build of FFmpeg on Microsoft Windows. This guide specifically targets the ARM64 architecture, but can be applied to x64 with slight modifications.
 

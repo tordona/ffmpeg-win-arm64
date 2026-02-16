@@ -1,4 +1,4 @@
-[![ffmpeg-win-arm64-auto-builds](https://github.com/tordona/ffmpeg-win-arm64-test/actions/workflows/main.yml/badge.svg)](https://github.com/tordona/ffmpeg-win-arm64-test/actions/workflows/main.yml)
+[![ffmpeg-win-arm64-auto-builds](https://github.com/tordona/ffmpeg-win-arm64/actions/workflows/main.yml/badge.svg)](https://github.com/tordona/ffmpeg-win-arm64/actions/workflows/main.yml)
 
 # ffmpeg-win-arm64
 FFmpeg builds for Windows on ARM (Qualcomm Snapdragon / ARM64)
@@ -17,7 +17,7 @@ Stable releases are based on the last two major releases, including current mino
 ## Latest Release
 The latest release tag provides consistent URLs that always point to the most recent successful daily build.
 
-* [Download Latest Build](https://github.com/tordona/ffmpeg-win-arm64-test/releases/tag/latest)
+* [Download Latest Build](https://github.com/tordona/ffmpeg-win-arm64/releases/tag/latest)
 
 ## Daily Releases
 Daily releases are automatically built based on the latest GitHub commits. These are available for up to 14 days.
