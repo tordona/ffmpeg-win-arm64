@@ -1,0 +1,174 @@
+name: Prepare Distribution
+
+on:
+  workflow_call:
+    inputs:
+      release_tag:
+        type: string
+        required: true
+      github_tag:
+        type: string
+        required: true
+      source_repo:
+        type: string
+        required: true 
+      version_name:
+        type: string
+        required: true
+      checkout_commit:
+        type: string
+        required: true
+      checkout_short:
+        type: string
+        required: true 
+    outputs:
+      build_date:
+        value: ${{ jobs.prep-distro.outputs.build_date }}
+      release_tag:
+        value: ${{ jobs.prep-distro.outputs.release_tag }}
+      github_tag:
+        value: ${{ jobs.prep-distro.outputs.github_tag }}
+jobs:
+  prep-distro:
+    name: '💻 Prepare Distribution Package'
+    runs-on: windows-11-arm
+    defaults:
+      run:
+        shell: bash
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      build_date: ${{ steps.build-date.outputs.build_date }}
+      release_tag: ${{ steps.tags.outputs.release_tag }}
+      github_tag: ${{ steps.tags.outputs.github_tag }}
+    steps:
+    - name: '🛒 Checkout'
+      uses: actions/checkout@v6
+    - name: '⬇️ Download Artifact'
+      uses: actions/download-artifact@v7
+      with:
+        path: ./builds
+    - name: '🍳 Make Release Directory'
+      run: |
+        mkdir releases -p
+    - name: '🍳 Make Build Date'
+      id: 'build-date'
+      run: |
+        build_date=$(date '+%Y.%m.%d.0')
+        removal_date=$(date '+%Y.%m.%d.0' -d 'today - 15 days')
+        echo "build_date=${build_date}" >> $GITHUB_OUTPUT
+    - name: '🔖 Release Tag'
+      id: 'tags'
+      run: |
+        temp_release_tag="${{ inputs.release_tag }}"
+        temp_release_tag="${temp_release_tag// /-}"
+        temp_release_tag="${temp_release_tag,,}"
+        if [[ "$temp_release_tag" == *"autobuild"* ]]; then
+          echo "release_tag=${temp_release_tag}-${{ steps.build-date.outputs.build_date }}" >> $GITHUB_OUTPUT
+        else
+          echo "release_tag=${temp_release_tag}" >> $GITHUB_OUTPUT
+        fi
+        echo "github_tag=${{ inputs.github_tag }}" >> $GITHUB_OUTPUT
+    - name: '📝 Create Header Notes'
+      id: 'header-notes'
+      run: |
+        root=$(pwd)
+        find . -wholename "*/builds/**/ffmpeg.exe" | while read -r ffmpeg; do
+          cd $root
+          bin_dir="${ffmpeg%/*}"
+          parent_dir=$(dirname "$bin_dir")
+          build_dir=$(basename $parent_dir)
+          cd "$parent_dir/.."
+          echo "📢 Create Header Notes"
+          filename="header_notes.md"
+          rm -f $filename
+          printf "## Windows ARM64 Builds\n" >> $filename
+          printf "\n" >> $filename
+        done
+    - name: '📝 Create Prerelease Notes'
+      id: 'prerelease-notes'
+      run: |
+        root=$(pwd)
+        find . -wholename "*/builds/**/ffmpeg.exe" | while read -r ffmpeg; do
+          cd $root
+          bin_dir="${ffmpeg%/*}"
+          parent_dir=$(dirname "$bin_dir")
+          build_dir=$(basename $parent_dir)
+          cd "$parent_dir/.."
+          echo "📢 Create Prerelease Notes"
+          filename="prerelease_notes.md"
+          rm -f $filename
+          printf "\n" >> $filename
+          printf "\n" >> $filename
+          printf "**Source**\n" >> $filename
+          printf "${{ inputs.source_repo }}/commit/${{ inputs.checkout_commit }}\n" >> $filename
+        done
+    - name: '📝 Concat Release Notes'
+      run: |
+        pwd
+        root=$(pwd)
+        find . -wholename "*/builds/**/ffmpeg.exe" | while read -r ffmpeg; do
+          cd $root
+          bin_dir="${ffmpeg%/*}"
+          parent_dir=$(dirname "$bin_dir")
+          build_dir=$(basename $parent_dir)
+          cd "$parent_dir/.."
+          header_notes="header_notes.md"
+          library_versions="library_versions.md"
+          recent="recent.md"
+          prerelease_notes="prerelease_notes.md"
+          if [[ -f "$header_notes" && -f "$library_versions" && -f "$prerelease_notes" ]]; then
+            cat "$header_notes" "$library_versions" "$prerelease_notes" > "$root/releases/release_notes.md"
+          fi
+          if [[ -f "$recent" ]]; then
+            cat "$root/releases/release_notes.md" "$recent" > "$root/releases/latest.md"
+          fi
+        done
+    - name: '🧹 Cleanup Files for Distribution'
+      working-directory: ./builds
+      run: |
+        find . -type d -iname "dump" -exec rm -r {} +
+        find . -type d -iname "examples" -exec rm -r {} +
+        find . -type f -iname '*.lib' -delete
+        find . -type f -iname '*.xsd' -delete
+        find . -type f -iname '*.ico' -delete
+        find . -type f -iname '*.md' -delete
+    - name: '🚚 Package for Distribution'
+      shell: bash
+      run: |
+        mkdir releases -p
+        root=$(pwd)
+        find . -wholename "*/builds/**/ffmpeg.exe" | while read -r ffmpeg; do
+          cd $root
+          bin_dir="${ffmpeg%/*}"
+          parent_dir=$(dirname "$bin_dir")
+          build_dir=$(basename $parent_dir)
+          cd "$parent_dir/.."
+          7z a "$build_dir.7z" "$build_dir"
+          sha256sum "$build_dir.7z" > "$build_dir.sha256"
+          mv "$build_dir.7z" "$root/releases"
+          mv "$build_dir.sha256" "$root/releases"
+          if [[ "${{ inputs.release_tag }}" == *"daily-autobuild"* ]]; then
+            find . -name readme.txt -type f -exec sed -i "s|${{ inputs.github_tag }}|master-latest|g" {} \;
+            latest_dir="${build_dir//${{ inputs.github_tag }}/master-latest}"
+            mv $build_dir $latest_dir
+            7z a "$latest_dir.7z" "$latest_dir"
+            sha256sum "$latest_dir.7z" > "$latest_dir.sha256"
+            mv "$latest_dir.7z" "$root/releases"
+            mv "$latest_dir.sha256" "$root/releases"
+          fi
+        done
+    - name: '📤 Upload Artifact'
+      uses: actions/upload-artifact@v6
+      with:
+        if-no-files-found: error
+        name: "ffmpeg-distro-prerelease"
+        path: |
+          ./releases/*.7z
+          ./releases/*.sha256
+          ./releases/*.md
+    - name: '☠️ Delete Previous Artifacts'
+      uses: geekyeggo/delete-artifact@v5
+      with:
+          name: |
+              temp-ffmpeg-*

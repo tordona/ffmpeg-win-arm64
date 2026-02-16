@@ -1,0 +1,153 @@
+name: Setup Workflow Defaults
+
+on:
+  workflow_call:
+    inputs:
+      release_tag:
+        description: 'Tag Name for Release'
+        required: false
+        default: "n8.0.1"
+        type: string
+      github_tag:
+        description: 'Version Tag to build'
+        required: false
+        default: "n8.0.1"
+        type: string
+      build_type:
+        description: 'Build type of included libraries'
+        required: false
+        default: 'essentials'
+        type: string
+      link_type:
+        description: 'Link type of libraries'
+        required: false
+        default: 'shared'
+        type: string
+      msystem:
+        description: 'MSYS2 System Environment'
+        required: true
+        default: 'CLANGARM64'
+        type: string
+      environment:
+        description: 'Deploy Environment'
+        required: false
+        default: 'base'
+        type: string
+    outputs:
+      release_tag:
+        value: ${{ jobs.defaults.outputs.release_tag }}
+      github_tag:
+        value: ${{ jobs.defaults.outputs.github_tag }}
+      build_type:
+        value: ${{ jobs.defaults.outputs.build_type }}
+      link_type:
+        value: ${{ jobs.defaults.outputs.link_type }}
+      msystem:
+        value: ${{ jobs.defaults.outputs.msystem }}
+      environment:
+        value: ${{ jobs.defaults.outputs.environment }}
+      arch:
+        value: ${{ jobs.defaults.outputs.arch }}
+      package_prefix:
+        value: ${{ jobs.defaults.outputs.package_prefix }}
+      major_version:
+        value: ${{ jobs.defaults.outputs.major_version }}
+      source_repo:
+        value: ${{ jobs.defaults.outputs.source_repo }}
+      git_dist_repo:
+        value: ${{ jobs.defaults.outputs.git_dist_repo }}
+
+env:
+  msys_toolchain: "clang"
+  msys_prefix: "mingw-w64"
+  source_repo: "https://github.com/FFmpeg/FFmpeg"
+  git_dist_repo: "https://github.com/tordona/ffmpeg-win-arm64"
+
+jobs:
+  defaults:
+    name: '🌐 Setup Environment Variables'
+    runs-on: ubuntu-latest
+    environment: base
+    outputs:
+      release_tag: ${{ steps.input-defaults.outputs.release_tag }}
+      github_tag: ${{ steps.input-defaults.outputs.github_tag }}
+      build_type: ${{ steps.input-defaults.outputs.build_type }}
+      link_type: ${{ steps.input-defaults.outputs.link_type }}
+      msystem: ${{ steps.input-defaults.outputs.msystem }}
+      environment: ${{ steps.input-defaults.outputs.environment }}
+      arch: ${{ steps.msys-defaults.outputs.arch }}
+      package_prefix: ${{ steps.msys-defaults.outputs.package_prefix }}
+      major_version: ${{ steps.input-defaults.outputs.major_version }}
+      source_repo: ${{ env.source_repo }}
+      git_dist_repo: ${{ env.git_dist_repo }}
+    steps:
+      - name: '🛒 Checkout'
+        uses: actions/checkout@v6
+      - name: '🗺️ Map Workflow Inputs to Output Variables'
+        id: input-defaults
+        shell: bash
+        run: |
+          echo "📢 Set up default values when not triggered from a workflow_dispatch"
+          temp_release_tag="${{ inputs.release_tag || 'daily-autobuild' }}"
+          if [[ "${{ github.event_name }}" == "schedule" ]]; then
+            temp_release_tag="daily-autobuild"
+          fi
+          echo "release_tag=${temp_release_tag}" >> $GITHUB_OUTPUT
+
+          temp_build_type="${{ inputs.build_type || 'essentials' }}"
+          if [[ "${{ github.event_name }}" == 'schedule' ]]; then
+            echo "📢 build_type matrix set by schedule"
+            echo "build_type=['essentials', 'full']" >> "$GITHUB_OUTPUT"
+          else
+            echo "📢 build_type matrix NOT set by schedule"
+            if [[ "${temp_build_type}" == "both" ]]; then
+              echo "build_type=['essentials', 'full']" >> "$GITHUB_OUTPUT"
+            else
+              echo "build_type=['${temp_build_type}']" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+  
+          temp_link_type="${{ inputs.link_type || 'shared' }}"
+          if [[ "${{ github.event_name }}" == "schedule" ]]; then
+            echo "📢 link_type matrix set by schedule"
+            echo "link_type=['shared', 'static']" >> $GITHUB_OUTPUT
+          else
+            echo "📢 link_type matrix NOT set by schedule"
+            if [[ "${temp_link_type}" == "both" ]]; then
+              echo "link_type=['shared', 'static']" >> $GITHUB_OUTPUT
+            else
+              echo "link_type=['${temp_link_type}']" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+          temp_msystem="${{ inputs.msystem || 'CLANGARM64' }}"
+          echo "msystem=${temp_msystem}" >> $GITHUB_OUTPUT
+
+          temp_environment="${{ inputs.environment || 'base' }}"
+          echo "environment=${temp_environment}" >> $GITHUB_OUTPUT
+
+          version="${{ inputs.github_tag }}"
+          if [ -z "$version" ]; then
+            curl -O https://raw.githubusercontent.com/FFmpeg/FFmpeg/refs/heads/master/RELEASE
+            version=$(<RELEASE)
+          fi
+          echo "📢 version: $version"
+          if [[ "$version" =~ ([0-9]+) ]]; then
+              major_version="${BASH_REMATCH[1]}"
+              echo "📢 Major version: $major_version"
+          fi
+          echo "github_tag=${version}" >> $GITHUB_OUTPUT
+          echo "major_version=${major_version}" >> $GITHUB_OUTPUT
+      - name: '🗺️ Map Toolchain Architecture Name'
+        id: msys-defaults
+        shell: bash
+        run: |
+          echo "📢 Map MSYSTEM to toolchain and CPU arch"
+          prefix="${msys_prefix}-${msys_toolchain}"
+          if [[ ${{ steps.input-defaults.outputs.msystem }} == "CLANGARM64" ]]; then
+              echo "arch=aarch64" >> $GITHUB_OUTPUT
+              echo "package_prefix=${prefix}-aarch64" >> $GITHUB_OUTPUT
+          elif [[ ${{ steps.input-defaults.outputs.msystem }} == "CLANG64" ]]; then
+              echo "arch=x86_64" >> $GITHUB_OUTPUT
+              echo "package_prefix=${prefix}-x86_64" >> $GITHUB_OUTPUT
+          fi

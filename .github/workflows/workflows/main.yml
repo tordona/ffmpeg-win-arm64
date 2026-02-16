@@ -1,0 +1,321 @@
+name: Autobuild FFmpeg Win-ARM64
+
+on:
+  schedule:
+    - cron: '0 16 * * *' 
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Tag Name for Release'
+        required: false
+        type: string
+      github_tag:
+        description: 'Version tag to build'
+        required: false
+        type: string
+      build_type:
+        description: 'Build type of enabled libraries'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+        - essentials
+        - full
+        - both
+      link_type:
+        description: 'Link type of libraries'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+        - shared
+        - static
+        - both
+      msystem:
+        description: 'MSYS2 System Environment'
+        required: true
+        default: 'CLANGARM64'
+        type: choice
+        options:
+        - CLANGARM64
+      environment:
+        description: 'Deploy Environment'
+        required: true
+        default: 'base'
+        type: environment
+  # push:
+  #   paths-ignore:
+  #     - '**.md'
+  #     - '.vscode/**'
+  #     - '.github/**'
+  #     - '.devcontainer/**'
+
+# concurrency:
+#   group: ${{ github.workflow }}-${{ github.ref }}
+#   cancel-in-progress: true
+
+env:
+  msys_toolchain: "clang"
+
+jobs:
+  defaults:
+    name: '🥡 Setup Default Values'
+    uses: ./.github/workflows/defaults.yml
+    with:
+      release_tag: ${{ inputs.release_tag }}
+      github_tag: ${{ inputs.github_tag }}
+      build_type: ${{ inputs.build_type }}
+      link_type: ${{ inputs.link_type }}
+      msystem: ${{ inputs.msystem }}
+      environment: ${{ inputs.environment }}
+  msys2:
+    name: '💻 MSYS2 Environment'
+    runs-on: windows-11-arm
+    needs: ['defaults']
+    environment: base
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    strategy:
+      matrix:
+        build_type: ${{ fromJSON(needs.defaults.outputs.build_type) }}
+        link_type: ${{ fromJSON(needs.defaults.outputs.link_type) }}
+    defaults:
+      run:
+        shell: msys2 {0}
+    outputs:
+      version_name: ${{ steps.ffmpeg-config-setup.outputs.version_name }}
+      checkout_commit: ${{ steps.parse-commit.outputs.checkout_commit }}
+      checkout_short: ${{ steps.parse-commit.outputs.checkout_short }}
+    steps:
+    - name: '🛒 Checkout'
+      uses: actions/checkout@v6
+    - name: '🔧 Setup MSYS2'
+      id: 'msys2-env'
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: ${{ needs.defaults.outputs.msystem }}
+        update: true
+        cache: true
+        release: true
+        install:
+            gcc
+            git
+            make
+        pacboy:
+            toolchain:p
+            gcc-compat:p
+            diffutils:p
+            libssh2:p
+            jq:p
+            github-cli:p
+            7zip:p
+            texinfo:p
+    - name: "⬇️ Download External Utlities"
+      run: |
+        mkdir utilities
+        cd utilities
+        curl -LO https://github.com/tordona/win-arm64-binaries/releases/download/rcedit/rcedit-v2.0-win-arm64.7z
+        7z x *.7z
+        # cd ..
+        # cp ./utilities/rcedit.exe "./${{ inputs.root_path }}/${{ inputs.version_name }}/bin"
+    - name: '🪡 Create FFmpeg Distribution Configuration Bits'
+      id: 'ffmpeg-config-setup'
+      uses: ./.github/actions/ffmpeg 
+      with:
+        github_tag: ${{ needs.defaults.outputs.github_tag }}
+        build_type: ${{ matrix.build_type }}
+        link_type: ${{ matrix.link_type }}
+        msystem: ${{ needs.defaults.outputs.msystem }}
+    - name: '🌪️ Clone FFmpeg Source Repository from Tag'
+      if: ${{ github.event.inputs.github_tag != '' }}
+      id: 'source-code-tag'
+      run: |
+        mkdir source
+        git -c advice.detachedHead=false clone --branch ${{ needs.defaults.outputs.github_tag }} ${{ needs.defaults.outputs.source_repo }} ./source
+    - name: '🌪️ Clone FFmpeg Source Repository from Latest'
+      if: ${{ github.event.inputs.github_tag == '' }}
+      id: 'source-code-latest'
+      run: |
+        mkdir source
+        git -c advice.detachedHead=false clone ${{ needs.defaults.outputs.source_repo }} ./source
+    - name: '🔦 Parse Commit Hash'
+      id: 'parse-commit'
+      run: |
+        cd source
+        commit=$(git rev-parse HEAD)
+        echo "📢 Commit hash: ${commit}"
+        echo "checkout_commit=${commit}" >> $GITHUB_OUTPUT
+        short=$(git rev-parse --short HEAD)
+        echo "📢 Commit short: ${short}"
+        echo "checkout_short=${short}" >> $GITHUB_OUTPUT
+    - name: "📦 Install Packages - Essentials Build"
+      id: 'essentials-packages'
+      if: ${{ matrix.build_type == 'essentials' }}
+      working-directory: ./config
+      run: |
+        echo "📢 Install required library packages - Essentials Build"
+        major_version="${{ needs.defaults.outputs.major_version }}"
+        packages=$(jq -r --arg version "$major_version" --arg prefix "${{ needs.defaults.outputs.package_prefix }}" '[.options.standard[], .options.essentials[] | .[] | select(.version <= $version and .custom != "true") | $prefix + "-" +.package] | sort_by(ascii_downcase) | join(" ")' options.json)
+        pacman -S --disable-download-timeout --noconfirm --overwrite '*' $packages
+        echo "packages=$packages" >> "$GITHUB_OUTPUT"
+    - name: "📦 Install Packages - Full Build"
+      id: 'full-packages'
+      if: ${{ matrix.build_type == 'full' }}
+      working-directory: ./config
+      run: |
+        echo "📢 Install required library packages - Full Build"
+        major_version="${{ needs.defaults.outputs.major_version }}"
+        packages=$(jq -r --arg version "$major_version" --arg prefix "${{ needs.defaults.outputs.package_prefix }}" '[.options.standard[], .options.essentials[], .options.full[] | .[] | select(.version <= $version and .custom != "true") | $prefix + "-" +.package] | sort_by(ascii_downcase) | join(" ")' options.json)
+        pacman -S --disable-download-timeout --noconfirm --overwrite '*' $packages
+        echo "packages=$packages" >> "$GITHUB_OUTPUT"
+    - name: "⬇️ Download External Packages"
+      run: |
+       mkdir packages
+       gh release download "${{ env.msys_toolchain }}-${{ needs.defaults.outputs.arch }}" --pattern "*.zst" -D "./packages" -R tordona/mingw-packages
+    - name: "➡️ Install External Packages"
+      run: |
+        echo "📢 Install Custom Packages from External Repo"
+        cd packages
+        pacman -U --disable-download-timeout --overwrite '*' --noconfirm *.pkg.tar.zst
+    - name: '🔨 Configure FFmpeg Build'
+      id: 'configure-ffmpeg'
+      env:
+        major_version: "${{ needs.defaults.outputs.major_version }}"
+        build_type: "${{ matrix.build_type }}"
+        build_config: "${{ steps.ffmpeg-config-setup.outputs.build_config }}"
+        build_file_ref: "${{ steps.ffmpeg-config-setup.outputs.build_file_ref }}"
+      continue-on-error: true
+      working-directory: ./source
+      run: |
+        echo "📢 Configure FFmpeg Build with Library Options"
+        bash ../.github/scripts/config_ffmpeg.sh
+    - name: '🪵 Log: Show FFmpeg Build Config'
+      if: steps.configure-ffmpeg.outcome == 'failure'
+      run: |
+        log="./source/ffbuild/config.log"
+        if [ -f "$log" ]; then
+          cat ./source/ffbuild/config.log
+        fi
+    - name: '🌳 Log: Show FFmpeg Configuration Output'
+      working-directory: ./source
+      run: |
+        if test -f "${{ steps.ffmpeg-config-setup.outputs.build_file_ref }}"; then
+          echo "$(<${{ steps.ffmpeg-config-setup.outputs.build_file_ref }})"
+        fi
+    - name: '🥋 Modifiy Config Header and Readme File'
+      env:
+        output_path: "${{ steps.ffmpeg-config-setup.outputs.output_path }}"
+        version_name: "${{ steps.ffmpeg-config-setup.outputs.version_name }}"
+        build_file_ref: "${{ steps.ffmpeg-config-setup.outputs.build_file_ref }}"
+        build_type: "${{ matrix.build_type }}"
+        link_type: "${{ matrix.link_type }}"
+        source_repo: "${{ needs.defaults.outputs.source_repo }}"
+        git_dist_repo: "${{ needs.defaults.outputs.git_dist_repo }}"
+        commit: "${{ steps.parse-commit.outputs.checkout_commit }}"
+        short: "${{ steps.parse-commit.outputs.checkout_short }}"
+      working-directory: ./source
+      run: |
+        echo "📢 Remove build distribution specifc configrations"
+        bash ../.github/scripts/config_header.sh
+    - name: '🔄 Copy Support Files'
+      env:
+        output_path: "${{ steps.ffmpeg-config-setup.outputs.output_path }}"
+        version_name: "${{ steps.ffmpeg-config-setup.outputs.version_name }}"
+        build_file_ref: "${{ steps.ffmpeg-config-setup.outputs.build_file_ref }}"
+      run: |
+        echo "📢 Copy support files to output directory"
+        bash .github/scripts/support_files.sh
+    - name: '🍳 Trigger Make Command'
+      id: 'make-ffmpeg'
+      working-directory: ./source
+      run: |
+        make -j$(nproc)
+    - name: '🏭 Trigger Install Command'
+      id: 'install-ffmpeg'
+      working-directory: ./source
+      run: |
+        make install -j$(nproc)
+    - name: '🔦 Parse Library Versions'
+      env:
+        output_path: "${{ steps.ffmpeg-config-setup.outputs.output_path }}"
+      working-directory: ./source
+      run: |
+        echo "📢 Parse out FFmpeg library versions into markdown file"
+        bash ../.github/scripts/library_versions.sh
+    - name: "🔦 Parse Essentials Package Versions"
+      if: ${{ matrix.build_type == 'essentials' }}
+      env:
+        output_path: "${{ steps.ffmpeg-config-setup.outputs.output_path }}"
+        version_name: "${{ steps.ffmpeg-config-setup.outputs.version_name }}"
+        packages: ${{ steps.essentials-packages.outputs.packages }}
+        package_prefix: "${{ needs.defaults.outputs.package_prefix }}"
+      run: |
+        echo "📢 Parse Essentials Package Versions"
+        bash .github/scripts/package_versions.sh
+    - name: "🔦 Parse Full Package Versions"
+      if: ${{ matrix.build_type == 'full' }}
+      env:
+        output_path: "${{ steps.ffmpeg-config-setup.outputs.output_path }}"
+        version_name: "${{ steps.ffmpeg-config-setup.outputs.version_name }}"
+        packages: ${{ steps.full-packages.outputs.packages }}
+        package_prefix: "${{ needs.defaults.outputs.package_prefix }}"
+      run: |
+        echo "📢 Parse Full Package Versions"
+        bash .github/scripts/package_versions.sh
+    - name: '🙈 Resource Versioning'
+      env:
+        github_tag: ${{ needs.defaults.outputs.github_tag }}
+      run: |
+        echo "📢 Update resource properties on executables"
+        bash .github/scripts/resource_edit.sh
+    # - name: '🧹 Cleanup Files for Distribution'
+    #   working-directory: ./builds
+    #   run: |
+    #     find . -type d -iname "dump" -exec rm -r {} +
+    #     find . -type d -iname "examples" -exec rm -r {} +
+    #     find . -type f -iname '*.lib' -delete
+    #     find . -type f -iname '*.xsd' -delete
+    #     find . -type f -iname '*.ico' -delete
+    # - name: '☑️ Verify Build Output'
+    #   working-directory: ./builds
+    #   id: 'verify-build-output'
+    #   run: |
+    #     pwd
+    #     ls -laR
+    # - name: '🚚 7Zip Archive Package'
+    #   working-directory: ./builds/ffmpeg-${{ matrix.link_type }}
+    #   id: 'archive-package'
+    #   run: |
+    #     pwd
+    #     version_name="${{ steps.ffmpeg-config-setup.outputs.version_name }}"
+    #     7z a "$version_name.7z" * -xr!*.bak -xr!*.ico -xr!*.lib -xr!*.xsd -xr!*.md
+    #     sha256sum "$version_name.7z" > "$version_name.sha256"
+    #     ls -la
+    - name: '📤 Upload Artifact'
+      uses: actions/upload-artifact@v6
+      with:
+        if-no-files-found: error
+        name: temp-${{ steps.ffmpeg-config-setup.outputs.version_name }}
+        path: |
+          ./builds/**/**/*
+  prep-distro:
+    name: '🎞️ Prepare Distribution'
+    uses: ./.github/workflows/distro.yml
+    needs: ['defaults', 'msys2']
+    with:
+      release_tag: "${{ needs.defaults.outputs.release_tag }}"
+      github_tag: "${{ needs.defaults.outputs.github_tag }}"
+      source_repo: "${{ needs.defaults.outputs.source_repo }}"
+      version_name: "${{ needs.msys2.outputs.version_name }}"
+      checkout_commit: "${{ needs.msys2.outputs.checkout_commit }}"
+      checkout_short: "${{ needs.msys2.outputs.checkout_short }}"
+  release-distro:
+    name: '🎞️ Release Distribution'
+    uses: ./.github/workflows/release.yml
+    needs: ['prep-distro']
+    permissions:
+      contents: write
+    with:
+      build_date: "${{ needs.prep-distro.outputs.build_date }}"
+      release_tag: "${{ needs.prep-distro.outputs.release_tag }}"
+      github_tag: "${{ needs.prep-distro.outputs.github_tag }}"

@@ -1,0 +1,138 @@
+name: Release Distribution
+
+on:
+  workflow_call:
+    inputs:
+      build_date:
+        type: string
+        required: true
+      release_tag:
+        type: string
+        required: false
+      github_tag:
+        type: string
+        required: true 
+
+jobs:
+  release-distro:
+    name: '💻 Release Distribution'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      contents: write
+    steps:
+    - name: '🛒 Checkout'
+      uses: actions/checkout@v6
+    - name: '⬇️ Download Artifact'
+      uses: actions/download-artifact@v7
+      with:
+        path: ./releases
+        pattern: '*-prerelease'
+    - name: '☑️ File Check'
+      working-directory: ./releases
+      run: |
+        archives=$(find . -name '*.7z')
+        if [[ -z "$archives" ]]; then
+          echo "📢 No Archives Found"
+          exit 1
+        fi
+        release_notes=$(find . -name "release_notes.md" -print -quit)
+        if [[ -z "$release_notes" ]]; then
+          echo "📢 No Release Notes Found"
+          exit 1
+        fi
+        mkdir ../latest -p
+        mv ffmpeg*latest* ../latest
+        cp $release_notes ../latest
+        recently_updated=$(find . -name "latest.md" -print -quit)
+        if [[ -n "$recently_updated" ]]; then
+          cp $recently_updated ../latest
+        fi
+    - name: '🔍 Check Build Release Exists'
+      id: 'check-build-release'
+      uses: insightsengineering/release-existence-action@v1.0.0
+      with:
+        release-tag: "${{ inputs.release_tag }}"
+    - name: '📤 Upload to Existing Package Release'
+      if: steps.check-build-release.outputs.release-exists == 'true'
+      working-directory: ./releases
+      run: |
+        gh release upload "${{ inputs.release_tag }}" \
+          '*.7z' \
+          '*.sha256' \
+          --clobber \
+    - name: '🔨 Create New Package Release'
+      if: steps.check-build-release.outputs.release-exists == 'false'
+      working-directory: ./releases
+      run: |
+        draft_flag=""
+        if [[ "${{ inputs.release_tag }}" != *"autobuild"* && 
+              "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          draft_flag="--draft"
+        fi
+        release_notes=$(find . -name "release_notes.md" -print -quit)
+        echo "📢 Create New Package Release"
+        gh release create "${{ inputs.release_tag }}" \
+          '*.7z' \
+          '*.sha256' \
+          --title '${{ inputs.release_tag }}' \
+          --notes-file $release_notes \
+          $draft_flag
+    - name: '🔖 Expired Daily Build Tag'
+      id: 'expired-daily-autobuild-tag'
+      run: |
+        temp_removal_date=$(date '+%Y.%m.%d.0' -d 'today - 15 days')
+        temp_removal_date="daily-autobuild-${temp_removal_date}"
+        echo "📢 Expired tag: $temp_removal_date"
+        echo "removal_date=${temp_removal_date}" >> $GITHUB_OUTPUT
+    - name: '🔍 Check Expired Release Exists'
+      id: 'check-expired-release'
+      uses: insightsengineering/release-existence-action@v1.0.0
+      with:
+        release-tag: "${{ steps.expired-daily-autobuild-tag.outputs.removal_date }}"
+    - name: '☠️ Delete Expired Build'
+      if: steps.check-expired-release.outputs.release-exists == 'true'
+      run: |
+        echo "📢 Delete Expired Build"
+        gh release delete "${{ steps.expired-daily-autobuild-tag.outputs.removal_date }}" --cleanup-tag -y
+    - name: '🔍 Check Latest Tag Exists'
+      id: 'check-latest-tag'
+      uses: insightsengineering/release-existence-action@v1.0.0
+      with:
+        release-tag: "latest"
+    - name: '☠️ Delete Latest Build'
+      if: steps.check-latest-tag.outputs.release-exists == 'true' 
+      run: |
+        echo "📢 Delete Lastest Release"
+        gh release delete "latest" --cleanup-tag -y
+    - name: '🔨 Create Latest Release'
+      if: success()
+      working-directory: ./latest
+      run: |
+        release_notes=$(find . -name "release_notes.md" -print -quit)
+        recently_updated=$(find . -name "latest.md" -print -quit)
+        if [[ "${{ inputs.release_tag }}" != *"daily-autobuild"* ]]; then
+          echo "📢 Skipping Create Latest Release"
+          exit 0
+        fi
+        if [[ ! -n "$release_notes" ]]; then
+          echo "📢 Skipping Create Latest Release"
+          exit 0
+        fi
+        notes=$release_notes
+        if [[ -n "$recently_updated" ]]; then
+          notes=$recently_updated
+        fi
+        echo "📢 Create Lastest Release"
+        gh release create "latest" \
+          '*.7z' \
+          '*.sha256' \
+          --title 'Latest Autobuild - ${{ inputs.build_date }}' \
+          --notes-file $notes \
+          --latest
+
+  

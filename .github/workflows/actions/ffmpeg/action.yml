@@ -1,0 +1,123 @@
+name: 'FFmpeg Distro Config'
+description: 'Setup distribution specific configuration pieces'
+inputs:
+  github_tag:
+    description: 'FFmpeg version from checked out source'
+    required: true
+  build_type:
+    description: 'Build type of included libraries'
+    required: true
+  link_type:
+    description: 'Link type of libraries'
+    required: true
+  msystem:
+    description: 'MSYS Environment'
+    required: true
+  major_version:
+    description: 'Version'
+    required: true
+outputs:
+  output_path:
+    description: 'Add bits to FFmpeg config setup'
+    value: ${{ steps.output-path.outputs.output_path }}
+  build_file_ref:
+    description: 'Filename of readme file included with generated build archive'
+    value: ${{ steps.build-file-ref.outputs.build_file_ref }}
+  version_name:
+    description: 'Version header string'
+    value: ${{ steps.version-name.outputs.version_name }}
+  build_config:
+    description: 'Updated build configuration'
+    value: ${{ steps.build-config.outputs.build_config }}
+
+runs:
+  using: "composite"
+  steps:
+  - name: '🗺️ Setup Configuration'
+    shell: msys2 {0}
+    working-directory: ./config
+    run: |
+      base_config="--extra-libs='-static -lpthread -lm -liconv' --pkg-config-flags='--static'"
+      echo "build_config=${base_config}" >> $GITHUB_ENV
+  - name: '🏛️ Set Target Architecture'
+    shell: msys2 {0} 
+    run: |
+      echo "📢 Set Explict Architecture Option Value"
+      if [[ ${{ inputs.msystem }} == "CLANGARM64" ]]; then
+        temp_config=" --arch=aarch64"
+      elif [[ ${{ inputs.msystem }} == "CLANG64" ]]; then
+        temp_config="--arch=x86_64"
+      fi
+      echo "build_config=$build_config$temp_config" >> $GITHUB_ENV
+  - name: '🔗 Set Link Type'
+    shell: msys2 {0}
+    run: |
+      if [[ ${{ inputs.link_type }} == "shared" ]]; then
+        temp_config=" --enable-shared --disable-static"
+      else
+        temp_config=" --disable-shared --enable-static"
+      fi
+      echo "build_config=$build_config$temp_config" >> $GITHUB_ENV
+  - name: '🏴 Set Compile Linker Flags'
+    shell: msys2 {0}
+    working-directory: ./config
+    run: |
+      if [[ ${{ inputs.build_type }} == "full" ]]; then
+        temp_config=" --extra-cflags=-DLIBTWOLAME_STATIC"
+        temp_config+=" --extra-ldflags='-Wl,--allow-multiple-definition'"
+        echo "build_config=$build_config$temp_config" >> $GITHUB_ENV
+      fi
+  - name: '🏴 Set Initial FFmpeg Build Config'
+    id: 'config'
+    shell: msys2 {0}
+    working-directory: ./config
+    run: |
+      echo "build_config: $build_config"
+      echo "build_config=$build_config" >> $GITHUB_OUTPUT
+  - name: '🧭 Build output path'
+    id: 'output-path'
+    shell: msys2 {0}
+    run: |
+      echo "📢 Define path for build output (prefix)"
+      path=$(pwd)
+      path="${path}/builds/ffmpeg-${{ inputs.link_type }}"
+      echo "📢 output_path: $path"
+      echo "output_path=${path}" >> $GITHUB_OUTPUT
+  - name: '🪢 Make Version Name String'
+    id: 'version-name'
+    shell: msys2 {0}
+    run: |
+      echo "📢 Make a version name string for headers and archive file naming"
+      shopt -s extglob
+      cpu="arm64"
+      if [[ ${{ inputs.msystem }} == "CLANG64" ]]; then
+        cpu="x64"
+      fi
+      version_string="${{ inputs.github_tag }}"
+      version_string="${version_string##+([[:alpha:]])}"
+      version_name="ffmpeg-$version_string-${{ inputs.build_type }}-${{ inputs.link_type }}-win-${cpu}"
+      echo "📢 version_name: $version_name"
+      echo "version_name=${version_name}" >> $GITHUB_OUTPUT
+  - name: '📃 Make Temporary Readme Filename'
+    id: 'build-file-ref'
+    shell: msys2 {0}
+    run: |
+      echo "📢 Direct configure command stdout to a text file."
+      echo "📢 Use text file as readme.txt inside distribution package."
+      echo "📢 Make a temporary file name for later copying."
+      build_file_ref="${{ inputs.build_type}}-${{ inputs.link_type }}.txt"
+      echo "📢 build_file_ref: $build_file_ref"
+      echo "build_file_ref=${build_file_ref}" >> $GITHUB_OUTPUT
+  - name: '☑️ Verify Config Settings'
+    id: 'build-config'
+    shell: msys2 {0}
+    run: |
+      echo "📢 Update FFmpeg build config with distribution specific settings"
+      temp_config="${{ env.build_config }}"
+      temp_config+=" --prefix=${{ steps.output-path.outputs.output_path }}/${{ steps.version-name.outputs.version_name }}"
+      temp_config+=" --datadir=${{ steps.output-path.outputs.output_path }}/${{ steps.version-name.outputs.version_name }}/presets"
+      temp_config+=" --docdir=${{ steps.output-path.outputs.output_path }}/${{ steps.version-name.outputs.version_name }}/docs"
+      temp_config+=" --libdir=${{ steps.output-path.outputs.output_path }}/dump/libs"
+      temp_config+=" --incdir=${{ steps.output-path.outputs.output_path }}/dump/include"
+      echo "📢 temp_config: $temp_config"
+      echo "build_config=${temp_config}" >> $GITHUB_OUTPUT
