@@ -45,12 +45,15 @@ jobs:
           echo "📢 No Release Notes Found"
           exit 1
         fi
-        mkdir ../latest -p
-        mv ffmpeg*latest* ../latest
-        cp $release_notes ../latest
-        recently_updated=$(find . -name "latest.md" -print -quit)
-        if [[ -n "$recently_updated" ]]; then
-          cp $recently_updated ../latest
+        if [[ "${{ inputs.release_tag }}" == *"autobuild"* && 
+              "${{ github.event_name }}" != "workflow_dispatch" ]]; then
+          mkdir ../latest -p
+          mv ffmpeg*latest* ../latest
+          cp $release_notes ../latest
+          recently_updated=$(find . -name "latest.md" -print -quit)
+          if [[ -n "$recently_updated" ]]; then
+            cp $recently_updated ../latest
+          fi
         fi
     - name: '🔍 Check Build Release Exists'
       id: 'check-build-release'
@@ -74,13 +77,17 @@ jobs:
               "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           draft_flag="--draft"
         fi
-        release_notes=$(find . -name "release_notes.md" -print -quit)
+        notes=$(find . -name "release_notes.md" -print -quit)
+        recently_updated=$(find . -name "latest.md" -print -quit)
+        if [[ -n "$recently_updated" ]]; then
+          notes=$recently_updated
+        fi
         echo "📢 Create New Package Release"
         gh release create "${{ inputs.release_tag }}" \
           '*.7z' \
           '*.sha256' \
           --title '${{ inputs.release_tag }}' \
-          --notes-file $release_notes \
+          --notes-file $notes \
           $draft_flag
     - name: '🔖 Expired Daily Build Tag'
       id: 'expired-daily-autobuild-tag'
@@ -110,20 +117,11 @@ jobs:
         echo "📢 Delete Lastest Release"
         gh release delete "latest" --cleanup-tag -y
     - name: '🔨 Create Latest Release'
-      if: success()
+      if: ${{ contains('${{ inputs.release_tag }}', 'daily-autobuild') }}
       working-directory: ./latest
       run: |
-        release_notes=$(find . -name "release_notes.md" -print -quit)
+        notes=$(find . -name "release_notes.md" -print -quit)
         recently_updated=$(find . -name "latest.md" -print -quit)
-        if [[ "${{ inputs.release_tag }}" != *"daily-autobuild"* ]]; then
-          echo "📢 Skipping Create Latest Release"
-          exit 0
-        fi
-        if [[ ! -n "$release_notes" ]]; then
-          echo "📢 Skipping Create Latest Release"
-          exit 0
-        fi
-        notes=$release_notes
         if [[ -n "$recently_updated" ]]; then
           notes=$recently_updated
         fi
