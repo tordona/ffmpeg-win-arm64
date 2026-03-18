@@ -45,8 +45,7 @@ jobs:
           echo "📢 No Release Notes Found"
           exit 1
         fi
-        if [[ "${{ inputs.release_tag }}" == *"autobuild"* && 
-              "${{ github.event_name }}" != "workflow_dispatch" ]]; then
+        if [[ "${{ inputs.release_tag }}" == *"autobuild"* ]]; then
           mkdir ../latest -p
           mv ffmpeg*latest* ../latest
           cp $release_notes ../latest
@@ -107,6 +106,7 @@ jobs:
         echo "📢 Delete Expired Build"
         gh release delete "${{ steps.expired-daily-autobuild-tag.outputs.removal_date }}" --cleanup-tag -y
     - name: '🔍 Check Latest Tag Exists'
+      if: ${{ contains(inputs.release_tag, 'daily-autobuild') }}
       id: 'check-latest-tag'
       uses: insightsengineering/release-existence-action@v1.0.0
       with:
@@ -117,7 +117,7 @@ jobs:
         echo "📢 Delete Lastest Release"
         gh release delete "latest" --cleanup-tag -y
     - name: '🔨 Create Latest Release'
-      if: ${{ contains('${{ inputs.release_tag }}', 'daily-autobuild') }}
+      if: ${{ contains(inputs.release_tag, 'daily-autobuild') }}
       working-directory: ./latest
       run: |
         notes=$(find . -name "release_notes.md" -print -quit)
