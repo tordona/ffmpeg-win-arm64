@@ -46,7 +46,7 @@ runs:
       if [[ ${{ inputs.msystem }} == "CLANGARM64" ]]; then
         temp_config=" --arch=aarch64"
       elif [[ ${{ inputs.msystem }} == "CLANG64" ]]; then
-        temp_config="--arch=x86_64"
+        temp_config=" --arch=x86_64"
       fi
       echo "build_config=$build_config$temp_config" >> $GITHUB_ENV
   - name: '🔗 Set Link Type'
@@ -64,6 +64,7 @@ runs:
     run: |
       if [[ ${{ inputs.build_type }} == "full" ]]; then
         temp_config=" --extra-cflags=-DLIBTWOLAME_STATIC"
+        temp_config=" --extra-cflags=-DCAIRO_WIN32_STATIC_BUILD"
         temp_config+=" --extra-ldflags='-Wl,--allow-multiple-definition'"
         echo "build_config=$build_config$temp_config" >> $GITHUB_ENV
       fi

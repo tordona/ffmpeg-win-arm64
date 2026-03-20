@@ -145,6 +145,12 @@ Usage:
         <td>❎☑️</td>
      </tr>
      <tr>
+        <td>cairo</td>
+        <td>8.1</td>
+        <td>cairo</td>
+        <td>✅</td>
+     </tr>
+     <tr>
         <td>fontconfig</td>
         <td>7</td>
         <td>fontconfig</td>
@@ -323,6 +329,12 @@ Usage:
         <td>7</td>
         <td>lame</td>
         <td>✅</td>
+     </tr>
+     <tr>
+        <td>libmpeghdec</td>
+        <td>8.1</td>
+        <td></td>
+        <td>☑️</td>
      </tr>
      <tr>
         <td>libmysofa</td>

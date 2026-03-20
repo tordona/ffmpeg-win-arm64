@@ -2,6 +2,7 @@ config_file="config.h"
 if [[ -f "$config_file" ]]; then
   sed -i "s|\s--extra-cflags='-march=native'||gI" $config_file
   sed -i "s|\s--extra-cflags=-DLIBTWOLAME_STATIC||gI" $config_file
+  sed -i "s|\s--extra-cflags=-DCAIRO_WIN32_STATIC_BUILD||gI" $config_file
   sed -i "s|\s--extra-cflags=-DMODPLUG_STATIC||gI" $config_file
   sed -i "s|\s--extra-ldflags='-Wl,--allow-multiple-definition'||gI" $config_file
   sed -i "s|\s--disable-manpages||gI" $config_file
