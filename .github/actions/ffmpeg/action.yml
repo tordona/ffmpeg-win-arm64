@@ -64,7 +64,7 @@ runs:
     run: |
       if [[ ${{ inputs.build_type }} == "full" ]]; then
         temp_config=" --extra-cflags=-DLIBTWOLAME_STATIC"
-        temp_config=" --extra-cflags=-DCAIRO_WIN32_STATIC_BUILD"
+        temp_config+=" --extra-cflags=-DCAIRO_WIN32_STATIC_BUILD"
         temp_config+=" --extra-ldflags='-Wl,--allow-multiple-definition'"
         echo "build_config=$build_config$temp_config" >> $GITHUB_ENV
       fi
