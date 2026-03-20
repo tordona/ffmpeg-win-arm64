@@ -434,6 +434,7 @@
         }, {
           "option": "libmpeghdec",
           "package": "mpeghdec",
+          "custom": "true",
           "version": "8.1"
         }
       ],
