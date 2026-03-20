@@ -154,8 +154,8 @@ jobs:
       working-directory: ./config
       run: |
         echo "📢 Install required library packages - Essentials Build"
-        major_version="${{ needs.defaults.outputs.major_version }}"
-        packages=$(jq -r --arg version "$major_version" --arg prefix "${{ needs.defaults.outputs.package_prefix }}" '[.options.standard[], .options.essentials[] | .[] | select(.version <= $version and .custom != "true") | $prefix + "-" +.package] | sort_by(ascii_downcase) | join(" ")' options.json)
+        target_version="${{ needs.defaults.outputs.target_version }}"
+        packages=$(jq -r --arg version "$target_version" --arg prefix "${{ needs.defaults.outputs.package_prefix }}" '[.options.standard[], .options.essentials[] | .[] | select(.version <= $version and .custom != "true") | $prefix + "-" +.package] | sort_by(ascii_downcase) | join(" ")' options.json)
         pacman -S --disable-download-timeout --noconfirm --overwrite '*' $packages
         echo "packages=$packages" >> "$GITHUB_OUTPUT"
     - name: "📦 Install Packages - Full Build"
@@ -164,8 +164,8 @@ jobs:
       working-directory: ./config
       run: |
         echo "📢 Install required library packages - Full Build"
-        major_version="${{ needs.defaults.outputs.major_version }}"
-        packages=$(jq -r --arg version "$major_version" --arg prefix "${{ needs.defaults.outputs.package_prefix }}" '[.options.standard[], .options.essentials[], .options.full[] | .[] | select(.version <= $version and .custom != "true") | $prefix + "-" +.package] | sort_by(ascii_downcase) | join(" ")' options.json)
+        target_version="${{ needs.defaults.outputs.target_version }}"
+        packages=$(jq -r --arg version "$target_version" --arg prefix "${{ needs.defaults.outputs.package_prefix }}" '[.options.standard[], .options.essentials[], .options.full[] | .[] | select(.version <= $version and .custom != "true") | $prefix + "-" +.package] | sort_by(ascii_downcase) | join(" ")' options.json)
         pacman -S --disable-download-timeout --noconfirm --overwrite '*' $packages
         echo "packages=$packages" >> "$GITHUB_OUTPUT"
     - name: "⬇️ Download External Packages"
@@ -180,7 +180,7 @@ jobs:
     - name: '🔨 Configure FFmpeg Build'
       id: 'configure-ffmpeg'
       env:
-        major_version: "${{ needs.defaults.outputs.major_version }}"
+        target_version: "${{ needs.defaults.outputs.target_version }}"
         build_type: "${{ matrix.build_type }}"
         build_config: "${{ steps.ffmpeg-config-setup.outputs.build_config }}"
         build_file_ref: "${{ steps.ffmpeg-config-setup.outputs.build_file_ref }}"
