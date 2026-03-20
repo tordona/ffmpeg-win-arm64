@@ -431,11 +431,6 @@
           "option": "whisper",
           "package": "whisper.cpp",
           "version": "8"
-        }, {
-          "option": "libmpeghdec",
-          "package": "mpeghdec",
-          "custom": "true",
-          "version": "8.1"
         }
       ],
       "dependent": [
