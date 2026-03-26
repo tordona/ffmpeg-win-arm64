@@ -132,5 +132,9 @@ jobs:
           --title 'Latest Autobuild - ${{ inputs.build_date }}' \
           --notes-file $notes \
           --latest
-
+    - name: '☠️ Delete Artifact'
+      uses: geekyeggo/delete-artifact@v5
+      with:
+          name: |
+              ffmpeg*
   
