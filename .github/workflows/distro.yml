@@ -136,28 +136,43 @@ jobs:
     - name: '🚚 Package for Distribution'
       shell: bash
       run: |
-        mkdir releases -p
-        root=$(pwd)
-        find . -wholename "*/builds/**/ffmpeg.exe" | while read -r ffmpeg; do
-          cd $root
-          bin_dir="${ffmpeg%/*}"
-          parent_dir=$(dirname "$bin_dir")
-          build_dir=$(basename $parent_dir)
-          cd "$parent_dir/.."
-          7z a "$build_dir.7z" "$build_dir"
-          sha256sum "$build_dir.7z" > "$build_dir.sha256"
-          mv "$build_dir.7z" "$root/releases"
-          mv "$build_dir.sha256" "$root/releases"
-          if [[ "${{ inputs.release_tag }}" == *"daily-autobuild"* ]]; then
-            find . -name readme.txt -type f -exec sed -i "s|${{ inputs.github_tag }}|master-latest|g" {} \;
-            latest_dir="${build_dir//${{ inputs.github_tag }}/master-latest}"
-            mv $build_dir $latest_dir
-            7z a "$latest_dir.7z" "$latest_dir"
-            sha256sum "$latest_dir.7z" > "$latest_dir.sha256"
-            mv "$latest_dir.7z" "$root/releases"
-            mv "$latest_dir.sha256" "$root/releases"
-          fi
-        done
+         mkdir releases -p
+          root=$(pwd)
+          find . -wholename "*/builds/**/ffmpeg.exe" | while read -r ffmpeg; do
+            cd $root
+            bin_dir="${ffmpeg%/*}"
+            parent_dir=$(dirname "$bin_dir")
+            build_dir=$(basename $parent_dir)
+            git_version="git-${{ inputs.checkout_short }}"
+            cd "$parent_dir/.."
+            if [[ "${{ inputs.release_tag }}" == *"daily-autobuild"* && "${{ inputs.github_tag }}" == *"git"* ]]; then
+              # rename value from https://github.com/FFmpeg/FFmpeg/blob/master/RELEASE to "git-SHORT_COMMIT_HASH"
+              git_version="git-${{ inputs.checkout_short }}"
+              find . -name readme.txt -type f -exec sed -i "s|${{ inputs.github_tag }}|$git_version|g" {} \;
+              git_name="${build_dir/${{ inputs.github_tag }}/$git_version}"
+              cp -r $build_dir $git_name
+              7z a "$git_name.7z" "$git_name"
+              sha256sum "$git_name.7z" > "$git_name.sha256"
+              mv "$git_name.7z" "$root/releases"
+              mv "$git_name.sha256" "$root/releases"
+            else
+              7z a "$build_dir.7z" "$build_dir"
+              sha256sum "$build_dir.7z" > "$build_dir.sha256"
+              mv "$build_dir.7z" "$root/releases"
+              mv "$build_dir.sha256" "$root/releases"
+            fi
+            if [[ "${{ inputs.release_tag }}" == *"daily-autobuild"* ]]; then
+              # rename / copy as "master-latest"
+              find . -name readme.txt -type f -exec sed -i "s|${{ inputs.github_tag }}|master-latest|g" {} \;
+              find . -name readme.txt -type f -exec sed -i "s|$git_version|master-latest|g" {} \;
+              latest_dir="${build_dir//${{ inputs.github_tag }}/master-latest}"
+              mv $build_dir $latest_dir
+              7z a "$latest_dir.7z" "$latest_dir"
+              sha256sum "$latest_dir.7z" > "$latest_dir.sha256"
+              mv "$latest_dir.7z" "$root/releases"
+              mv "$latest_dir.sha256" "$root/releases"
+            fi
+          done
     - name: '📤 Upload Artifact'
       uses: actions/upload-artifact@v6
       with:
