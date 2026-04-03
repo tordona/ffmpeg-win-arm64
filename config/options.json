@@ -351,6 +351,10 @@
           "option": "liboapv",
           "package": "openapv",
           "version": "8"
+        }, {
+          "option": "vulkan",
+          "package": "spirv-headers",
+          "version": "7"
         }
       ],
       "external": [
