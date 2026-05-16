@@ -261,29 +261,6 @@ jobs:
       run: |
         echo "📢 Update resource properties on executables"
         bash .github/scripts/resource_edit.sh
-    # - name: '🧹 Cleanup Files for Distribution'
-    #   working-directory: ./builds
-    #   run: |
-    #     find . -type d -iname "dump" -exec rm -r {} +
-    #     find . -type d -iname "examples" -exec rm -r {} +
-    #     find . -type f -iname '*.lib' -delete
-    #     find . -type f -iname '*.xsd' -delete
-    #     find . -type f -iname '*.ico' -delete
-    # - name: '☑️ Verify Build Output'
-    #   working-directory: ./builds
-    #   id: 'verify-build-output'
-    #   run: |
-    #     pwd
-    #     ls -laR
-    # - name: '🚚 7Zip Archive Package'
-    #   working-directory: ./builds/ffmpeg-${{ matrix.link_type }}
-    #   id: 'archive-package'
-    #   run: |
-    #     pwd
-    #     version_name="${{ steps.ffmpeg-config-setup.outputs.version_name }}"
-    #     7z a "$version_name.7z" * -xr!*.bak -xr!*.ico -xr!*.lib -xr!*.xsd -xr!*.md
-    #     sha256sum "$version_name.7z" > "$version_name.sha256"
-    #     ls -la
     - name: '📤 Upload Artifact'
       uses: actions/upload-artifact@v6
       with:
