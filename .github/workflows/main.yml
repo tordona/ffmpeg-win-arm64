@@ -111,6 +111,14 @@ jobs:
             7zip:p
             texinfo:p
             rcedit:p
+    - name: '🔐 Import GPG Public Key'
+      run: |
+        echo "📢 Allow verify external packages from detached sig"
+        pacman-key --init
+        echo "${{ secrets.GPG_PUBLIC_KEY }}" > /tmp/pubkey.asc
+        pacman-key --add /tmp/pubkey.asc
+        pacman-key --lsign-key ${{ secrets.GPG_PUBLIC_KEY_ID }}
+        rm /tmp/pubkey.asc
     - name: '🪡 Create FFmpeg Distribution Configuration Bits'
       id: 'ffmpeg-config-setup'
       uses: ./.github/actions/ffmpeg 
@@ -164,7 +172,7 @@ jobs:
     - name: "⬇️ Download External Packages"
       run: |
        mkdir packages
-       gh release download "${{ env.msys_toolchain }}-${{ needs.defaults.outputs.arch }}" --pattern "*.zst" -D "./packages" -R tordona/mingw-packages
+       gh release download "${{ env.msys_toolchain }}-${{ needs.defaults.outputs.arch }}" --pattern "*.zst" --pattern "*.sig" -D "./packages" -R tordona/mingw-packages
     - name: "➡️ Install External Packages"
       run: |
         echo "📢 Install Custom Packages from External Repo"
