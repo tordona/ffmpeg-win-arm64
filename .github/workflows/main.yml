@@ -110,14 +110,7 @@ jobs:
             github-cli:p
             7zip:p
             texinfo:p
-    - name: "⬇️ Download External Utlities"
-      run: |
-        mkdir utilities
-        cd utilities
-        curl -LO https://github.com/tordona/win-arm64-binaries/releases/download/rcedit/rcedit-v2.0-win-arm64.7z
-        7z x *.7z
-        # cd ..
-        # cp ./utilities/rcedit.exe "./${{ inputs.root_path }}/${{ inputs.version_name }}/bin"
+            rcedit:p
     - name: '🪡 Create FFmpeg Distribution Configuration Bits'
       id: 'ffmpeg-config-setup'
       uses: ./.github/actions/ffmpeg 

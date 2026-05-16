@@ -1,9 +1,4 @@
 echo "📢 Resource Edit FFmpeg FFplay FFprobe"
-rcedit=$(find . -name "rcedit.exe" -exec realpath {} \;)
-if [[ -z "$rcedit" ]]; then
-  echo "📢 rcedit not found"
-  exit 1
-fi
 
 version="$github_tag"
 build_date=$(date '+%Y.%m.%d.0')
@@ -27,13 +22,13 @@ for ff in "${ff_progs[@]}"; do
   if [[ -n "$file" ]]; then
     product_prefix=${ff:0:2}
     product_suffix=${ff:2}
-    $rcedit $file --set-version-string "FileDescription" "${!desc}"
-    $rcedit $file --set-file-version "${file_version}"
-    $rcedit $file --set-version-string "ProductName" "${product_prefix^^}${product_suffix}"
-    $rcedit $file --set-version-string "ProductVersion" "${version}"
-    $rcedit $file --set-version-string "LegalCopyright" "${copyright}"
+    rcedit $file --set-version-string "FileDescription" "${!desc}"
+    rcedit $file --set-file-version "${file_version}"
+    rcedit $file --set-version-string "ProductName" "${product_prefix^^}${product_suffix}"
+    rcedit $file --set-version-string "ProductVersion" "${version}"
+    rcedit $file --set-version-string "LegalCopyright" "${copyright}"
     if [[ -n "$icon" ]]; then
-      $rcedit $file --set-icon $icon
+      rcedit $file --set-icon $icon
       rm $icon
     fi
   fi
