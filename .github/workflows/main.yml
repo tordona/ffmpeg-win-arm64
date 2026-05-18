@@ -297,3 +297,4 @@ jobs:
       build_date: "${{ needs.prep-distro.outputs.build_date }}"
       release_tag: "${{ needs.prep-distro.outputs.release_tag }}"
       github_tag: "${{ needs.prep-distro.outputs.github_tag }}"
+      checkout_short: "${{ needs.distro.outputs.checkout_short }}"

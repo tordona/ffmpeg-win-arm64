@@ -28,6 +28,8 @@ on:
         value: ${{ jobs.prep-distro.outputs.release_tag }}
       github_tag:
         value: ${{ jobs.prep-distro.outputs.github_tag }}
+      checkout_short:
+        value: ${{ jobs.prep-distro.outputs.checkout_short }}
 jobs:
   prep-distro:
     name: '💻 Prepare Distribution Package'
@@ -41,6 +43,7 @@ jobs:
       build_date: ${{ steps.build-date.outputs.build_date }}
       release_tag: ${{ steps.tags.outputs.release_tag }}
       github_tag: ${{ steps.tags.outputs.github_tag }}
+      checkout_short: ${{ steps.tags.outputs.checkout_short }}
     steps:
     - name: '🛒 Checkout'
       uses: actions/checkout@v6
@@ -69,6 +72,7 @@ jobs:
           echo "release_tag=${temp_release_tag}" >> $GITHUB_OUTPUT
         fi
         echo "github_tag=${{ inputs.github_tag }}" >> $GITHUB_OUTPUT
+        echo "checkout_short=${{ inputs.checkout_short }}" >> $GITHUB_OUTPUT
     - name: '📝 Create Header Notes'
       id: 'header-notes'
       run: |

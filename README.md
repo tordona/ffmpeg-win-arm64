@@ -15,9 +15,9 @@ Stable releases are based on the last two major releases, including current mino
 * [FFmpeg v7.1.4](https://github.com/tordona/ffmpeg-win-arm64/releases/tag/7.1.4)
 
 ## Latest Release
-The latest release tag provides consistent URLs that always point to the most recent successful daily build.
+The latest release provides consistent URLs that always point to the most recent successful daily build.
 
-* [Download Latest Build](https://github.com/tordona/ffmpeg-win-arm64/releases/tag/latest)
+* [Download Latest Build](https://github.com/tordona/ffmpeg-win-arm64/releases/latest)
 
 ## Daily Releases
 Daily releases are automatically built based on the latest GitHub commits. These are available for up to 14 days.

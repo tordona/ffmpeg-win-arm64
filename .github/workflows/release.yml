@@ -11,6 +11,9 @@ on:
         required: false
       github_tag:
         type: string
+        required: true
+      checkout_short:
+        type: string
         required: true 
 
 jobs:
@@ -105,17 +108,17 @@ jobs:
       run: |
         echo "📢 Delete Expired Build"
         gh release delete "${{ steps.expired-daily-autobuild-tag.outputs.removal_date }}" --cleanup-tag -y
-    - name: '🔍 Check Latest Tag Exists'
-      if: ${{ contains(inputs.release_tag, 'daily-autobuild') }}
-      id: 'check-latest-tag'
-      uses: insightsengineering/release-existence-action@v1.0.0
-      with:
-        release-tag: "latest"
-    - name: '☠️ Delete Latest Build'
-      if: steps.check-latest-tag.outputs.release-exists == 'true' 
-      run: |
-        echo "📢 Delete Lastest Release"
-        gh release delete "latest" --cleanup-tag -y
+    # - name: '🔍 Check Latest Tag Exists'
+    #   if: ${{ contains(inputs.release_tag, 'daily-autobuild') }}
+    #   id: 'check-latest-tag'
+    #   uses: insightsengineering/release-existence-action@v1.0.0
+    #   with:
+    #     release-tag: "latest"
+    # - name: '☠️ Delete Latest Build'
+    #   if: steps.check-latest-tag.outputs.release-exists == 'true' 
+    #   run: |
+    #     echo "📢 Delete Lastest Release"
+    #     gh release delete "latest" --cleanup-tag -y
     - name: '🔨 Create Latest Release'
       if: ${{ contains(inputs.release_tag, 'daily-autobuild') }}
       working-directory: ./latest
@@ -126,7 +129,7 @@ jobs:
           notes=$recently_updated
         fi
         echo "📢 Create Lastest Release"
-        gh release create "latest" \
+        gh release create "${{ inputs.checkout_short }}" \
           '*.7z' \
           '*.sha256' \
           --title 'Latest Autobuild - ${{ inputs.build_date }}' \
