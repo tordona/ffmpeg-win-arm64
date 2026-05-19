@@ -3,6 +3,7 @@
 # ffmpeg-win-arm64
 FFmpeg builds for Windows on ARM (Qualcomm Snapdragon / ARM64)
 
+* Qualcomm Snapdragon 850
 * Qualcomm Snapdragon 7c
 * Qualcomm Snapdragon 8cx
 * Qualcomm Snapdragon X
