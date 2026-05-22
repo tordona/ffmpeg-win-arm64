@@ -92,9 +92,10 @@ jobs:
       if: ${{ contains(inputs.release_tag, 'daily-autobuild') }}
       id: 'latest-release-tag-name'
       run: |
-        tag_name=$(gh release view -R ${{ github.repository }} --json tagName --template '{{.tagName}}')
-        if [[ $tag_name == "latest-"* ]]; then
-          echo "latest_tag_name=${tag_name}" >> $GITHUB_OUTPUT
+        prefix="latest-"
+        latest_autobuild_release=$(gh release list --repo ${{ github.repository }} --json tagName --jq ".[] | select(.tagName | startswith(\"$prefix\")) | .tagName" | head -n 1)
+        if [[ -n "$latest_autobuild_release" ]]; then
+          echo "latest_tag_name=${latest_autobuild_release}" >> $GITHUB_OUTPUT
         fi
     - name: '☠️ Delete Latest Release'
       if: steps.latest-release-tag-name.outputs.latest_tag_name != '' 
