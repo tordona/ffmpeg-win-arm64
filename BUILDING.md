@@ -157,6 +157,12 @@ Usage:
         <td>❎☑️</td>
      </tr>
      <tr>
+        <td>ffnvcodec</td>
+        <td>7</td>
+        <td>ffnvcodec-headers</td>
+        <td>✅</td>
+     </tr>
+     <tr>
         <td>frei0r</td>
         <td>7</td>
         <td>frei0r-plugins</td>
