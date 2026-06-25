@@ -283,10 +283,19 @@ jobs:
         name: temp-${{ steps.ffmpeg-config-setup.outputs.version_name }}
         path: |
           ./builds/**/**/*
+  security-scan:
+    name: '👮 Security Scan'
+    uses: ./.github/workflows/scan.yml
+    needs: ['msys2']
+    permissions:
+      contents: read
+      security-events: write
+    with:
+      version_name: "${{ needs.msys2.outputs.version_name }}"
   prep-distro:
     name: '🎞️ Prepare Distribution'
     uses: ./.github/workflows/distro.yml
-    needs: ['defaults', 'msys2']
+    needs: ['defaults', 'msys2', 'security-scan']
     with:
       release_tag: "${{ needs.defaults.outputs.release_tag }}"
       github_tag: "${{ needs.defaults.outputs.github_tag }}"
