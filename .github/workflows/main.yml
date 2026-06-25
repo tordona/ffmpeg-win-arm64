@@ -54,6 +54,10 @@ on:
 #   group: ${{ github.workflow }}-${{ github.ref }}
 #   cancel-in-progress: true
 
+permissions:
+  contents: read
+  packages: read
+
 env:
   msys_toolchain: "clang"
 
@@ -86,6 +90,9 @@ jobs:
       version_name: ${{ steps.ffmpeg-config-setup.outputs.version_name }}
       checkout_commit: ${{ steps.parse-commit.outputs.checkout_commit }}
       checkout_short: ${{ steps.parse-commit.outputs.checkout_short }}
+    permissions:
+      actions: read
+      security-events: write
     steps:
     - name: '🛒 Checkout'
       uses: actions/checkout@v6
@@ -149,7 +156,7 @@ jobs:
         short=$(git rev-parse --short HEAD)
         echo "📢 Commit short: ${short}"
         echo "checkout_short=${short}" >> $GITHUB_OUTPUT
-    - name: "📦 Install Packages - Essentials Build"
+    - name: '📦 Install Packages - Essentials Build'
       id: 'essentials-packages'
       if: ${{ matrix.build_type == 'essentials' }}
       working-directory: ./config
@@ -159,7 +166,7 @@ jobs:
         packages=$(jq -r --arg version "$target_version" --arg prefix "${{ needs.defaults.outputs.package_prefix }}" '[.options.standard[], .options.essentials[] | .[] | select(.version <= $version and .custom != "true") | $prefix + "-" +.package] | sort_by(ascii_downcase) | join(" ")' options.json)
         pacman -S --disable-download-timeout --noconfirm --overwrite '*' $packages
         echo "packages=$packages" >> "$GITHUB_OUTPUT"
-    - name: "📦 Install Packages - Full Build"
+    - name: '📦 Install Packages - Full Build'
       id: 'full-packages'
       if: ${{ matrix.build_type == 'full' }}
       working-directory: ./config
@@ -169,11 +176,11 @@ jobs:
         packages=$(jq -r --arg version "$target_version" --arg prefix "${{ needs.defaults.outputs.package_prefix }}" '[.options.standard[], .options.essentials[], .options.full[] | .[] | select(.version <= $version and .custom != "true") | $prefix + "-" +.package] | sort_by(ascii_downcase) | join(" ")' options.json)
         pacman -S --disable-download-timeout --noconfirm --overwrite '*' $packages
         echo "packages=$packages" >> "$GITHUB_OUTPUT"
-    - name: "⬇️ Download External Packages"
+    - name: '⬇️ Download External Packages'
       run: |
        mkdir packages
        gh release download "${{ env.msys_toolchain }}-${{ needs.defaults.outputs.arch }}" --pattern "*.zst" --pattern "*.sig" -D "./packages" -R tordona/mingw-packages
-    - name: "➡️ Install External Packages"
+    - name: '➡️ Install External Packages'
       run: |
         echo "📢 Install Custom Packages from External Repo"
         cd packages
@@ -243,7 +250,7 @@ jobs:
       run: |
         echo "📢 Parse out FFmpeg library versions into markdown file"
         bash ../.github/scripts/library_versions.sh
-    - name: "🔦 Parse Essentials Package Versions"
+    - name: '🔦 Parse Essentials Package Versions'
       if: ${{ matrix.build_type == 'essentials' }}
       env:
         output_path: "${{ steps.ffmpeg-config-setup.outputs.output_path }}"
@@ -253,7 +260,7 @@ jobs:
       run: |
         echo "📢 Parse Essentials Package Versions"
         bash .github/scripts/package_versions.sh
-    - name: "🔦 Parse Full Package Versions"
+    - name: '🔦 Parse Full Package Versions'
       if: ${{ matrix.build_type == 'full' }}
       env:
         output_path: "${{ steps.ffmpeg-config-setup.outputs.output_path }}"
@@ -284,7 +291,6 @@ jobs:
       release_tag: "${{ needs.defaults.outputs.release_tag }}"
       github_tag: "${{ needs.defaults.outputs.github_tag }}"
       source_repo: "${{ needs.defaults.outputs.source_repo }}"
-      version_name: "${{ needs.msys2.outputs.version_name }}"
       checkout_commit: "${{ needs.msys2.outputs.checkout_commit }}"
       checkout_short: "${{ needs.msys2.outputs.checkout_short }}"
   release-distro:

@@ -57,6 +57,9 @@ on:
       git_dist_repo:
         value: ${{ jobs.defaults.outputs.git_dist_repo }}
 
+permissions:
+  contents: read
+
 env:
   msys_toolchain: "clang"
   msys_prefix: "mingw-w64"
