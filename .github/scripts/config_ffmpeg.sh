@@ -4,7 +4,4 @@ if [[ "${build_type}" == "full" ]]; then
   ffmpeg_lib_options+=" "
   ffmpeg_lib_options+=$(jq -r --arg version "$target_version" '[.options.full[] | .[] | select(.version <= $version) | "--enable-" + .option] | join(" ")' ../config/options.json)
 fi
-command="./configure ${build_config} ${generic_options} ${ffmpeg_lib_options}"
-echo "📢"
-echo "$command"
-eval "$command > ${build_file_ref}"
+echo "${build_config} ${generic_options} ${ffmpeg_lib_options}" | xargs ./configure
