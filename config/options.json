@@ -77,22 +77,6 @@
         {
           "option": "txtpages",
           "status": "disable"
-        },
-		{
-          "option": "nvenc",
-          "status": "enable"
-        },
-		{
-          "option": "nvdec",
-          "status": "enable"
-        },
-		{
-          "option": "cuda-llvm",
-          "status": "enable"
-        },
-		{
-          "option": "cuvid",
-          "status": "enable"
         }
     ],
     "standard": {
@@ -203,9 +187,25 @@
           "package": "SDL2",
           "version": "7"
         }, {
+          "option": "nvenc",
+          "package": "ffnvcodec-headers",
+          "version": "9"
+        }, {
+          "option": "nvdec",
+          "package": "ffnvcodec-headers",
+          "version": "9"
+        }, {
+          "option": "cuda-llvm",
+          "package": "ffnvcodec-headers",
+          "version": "9"
+        }, {
+          "option": "cuvid",
+          "package": "ffnvcodec-headers",
+          "version": "9"
+        }, {
           "option": "ffnvcodec",
           "package": "ffnvcodec-headers",
-          "version": "7"
+          "version": "9"
         }
       ],
       "external": [
