@@ -92,6 +92,7 @@ jobs:
       checkout_short: ${{ steps.parse-commit.outputs.checkout_short }}
     permissions:
       actions: read
+      contents: read
       security-events: write
     steps:
     - name: '🛒 Checkout'
@@ -160,20 +161,24 @@ jobs:
       id: 'essentials-packages'
       if: ${{ matrix.build_type == 'essentials' }}
       working-directory: ./config
+      env:
+        target_version: ${{ needs.defaults.outputs.target_version }}
+        package_prefix: ${{ needs.defaults.outputs.package_prefix }}
       run: |
         echo "📢 Install required library packages - Essentials Build"
-        target_version="${{ needs.defaults.outputs.target_version }}"
-        packages=$(jq -r --arg version "$target_version" --arg prefix "${{ needs.defaults.outputs.package_prefix }}" '[.options.standard[], .options.essentials[] | .[] | select(.version <= $version and .custom != "true") | $prefix + "-" +.package] | sort_by(ascii_downcase) | join(" ")' options.json)
+        packages=$(jq -r --arg version "$target_version" --arg prefix "$package_prefix" '[.options.standard[], .options.essentials[] | .[] | select(.version <= $version and .custom != "true") | $prefix + "-" +.package] | sort_by(ascii_downcase) | join(" ")' options.json)
         pacman -S --disable-download-timeout --noconfirm --overwrite '*' $packages
         echo "packages=$packages" >> "$GITHUB_OUTPUT"
     - name: '📦 Install Packages - Full Build'
       id: 'full-packages'
       if: ${{ matrix.build_type == 'full' }}
       working-directory: ./config
+      env:
+        target_version: ${{ needs.defaults.outputs.target_version }}
+        package_prefix: ${{ needs.defaults.outputs.package_prefix }}
       run: |
         echo "📢 Install required library packages - Full Build"
-        target_version="${{ needs.defaults.outputs.target_version }}"
-        packages=$(jq -r --arg version "$target_version" --arg prefix "${{ needs.defaults.outputs.package_prefix }}" '[.options.standard[], .options.essentials[], .options.full[] | .[] | select(.version <= $version and .custom != "true") | $prefix + "-" +.package] | sort_by(ascii_downcase) | join(" ")' options.json)
+        packages=$(jq -r --arg version "$target_version" --arg prefix "$package_prefix" '[.options.standard[], .options.essentials[], .options.full[] | .[] | select(.version <= $version and .custom != "true") | $prefix + "-" +.package] | sort_by(ascii_downcase) | join(" ")' options.json)
         pacman -S --disable-download-timeout --noconfirm --overwrite '*' $packages
         echo "packages=$packages" >> "$GITHUB_OUTPUT"
     - name: '⬇️ Download External Packages'
@@ -206,9 +211,11 @@ jobs:
         fi
     - name: '🌳 Log: Show FFmpeg Configuration Output'
       working-directory: ./source
+      env:
+        build_file_ref: "${{ steps.ffmpeg-config-setup.outputs.build_file_ref }}"
       run: |
-        if test -f "${{ steps.ffmpeg-config-setup.outputs.build_file_ref }}"; then
-          echo "$(<${{ steps.ffmpeg-config-setup.outputs.build_file_ref }})"
+        if test -f "$build_file_ref"; then
+          echo "$(<$build_file_ref)"
         fi
     - name: '🥋 Modifiy Config Header and Readme File'
       env:
