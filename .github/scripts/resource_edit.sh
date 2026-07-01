@@ -1,8 +1,7 @@
 echo "📢 Resource Edit FFmpeg FFplay FFprobe"
 
-version="$github_tag"
-build_date=$(date '+%Y.%m.%d.0')
-file_version="$build_date"
+product_version="$github_tag"
+file_version="$product_version"
 copyright="Copyright © 2000-$(date '+%Y') the FFmpeg developers"
 ffmpeg_desc="A command line tool to convert multimedia files between formats"
 ffplay_desc="A simple media player based on SDL and the FFmpeg libraries"
@@ -13,6 +12,12 @@ ff_progs=(
   "ffplay"
   "ffprobe"
 )
+
+for str in "${product_version[@]}"; do
+  if [[ $str =~ ([0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
+    file_version="${BASH_REMATCH[1]}"
+  fi
+done
 
 for ff in "${ff_progs[@]}"; do
   desc=$ff
@@ -25,7 +30,7 @@ for ff in "${ff_progs[@]}"; do
     rcedit $file --set-version-string "FileDescription" "${!desc}"
     rcedit $file --set-file-version "${file_version}"
     rcedit $file --set-version-string "ProductName" "${product_prefix^^}${product_suffix}"
-    rcedit $file --set-version-string "ProductVersion" "${version}"
+    rcedit $file --set-version-string "ProductVersion" "${product_version}"
     rcedit $file --set-version-string "LegalCopyright" "${copyright}"
     if [[ -n "$icon" ]]; then
       rcedit $file --set-icon $icon
