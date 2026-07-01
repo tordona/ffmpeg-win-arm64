@@ -190,6 +190,17 @@ jobs:
         echo "📢 Install Custom Packages from External Repo"
         cd packages
         pacman -U --disable-download-timeout --overwrite '*' --noconfirm *.pkg.tar.zst
+    - name: '🏃 FFmpeg Nvidia Headers'
+      env:
+        target_version: ${{ needs.defaults.outputs.target_version }}
+      run: |
+        # MSYS package maybe outdated due to waiting for a tagged release
+        if awk "BEGIN {exit !($target_version >= 9)}"; then
+          echo "📢 Grab latest nvcodec headers."
+          git -c advice.detachedHead=false clone https://code.ffmpeg.org/FFmpeg/nv-codec-headers nv-codec-headers
+          cd nv-codec-headers
+          make install PREFIX="/clangarm64"
+        fi
     - name: '🔨 Configure FFmpeg Build'
       id: 'configure-ffmpeg'
       env:
