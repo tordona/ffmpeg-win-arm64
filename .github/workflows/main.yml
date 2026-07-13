@@ -204,6 +204,7 @@ jobs:
     - name: '🔨 Configure FFmpeg Build'
       id: 'configure-ffmpeg'
       env:
+        release_tag: "${{ needs.defaults.outputs.release_tag }}"
         target_version: "${{ needs.defaults.outputs.target_version }}"
         build_type: "${{ matrix.build_type }}"
         build_config: "${{ steps.ffmpeg-config-setup.outputs.build_config }}"

@@ -433,7 +433,9 @@
         }, {
           "option": "libshaderc",
           "package": "shaderc",
-          "version": "7"
+          "version": "7",
+          "max": "8.1",
+          "daily": "false"
         }, {
           "option": "libvvenc",
           "package": "libvvenc",
