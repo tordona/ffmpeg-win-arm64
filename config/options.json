@@ -1,83 +1,82 @@
-
 {
   "options": {
     "generic": [
-        {
-          "option": "gpl",
-          "status": "enable"
-        },
-        {
-          "option": "version3",
-          "status": "enable"
-        },
-        {
-          "option": "pic",
-          "status": "enable"
-        },
-        {
-          "option": "pthreads",
-          "status": "enable"
-        },
-        {
-          "option": "iconv",
-          "status": "enable"
-        },
-        {
-          "option": "libxml2",
-          "status": "enable"
-        },
-        {
-          "option": "bzlib",
-          "status": "enable"
-        },
-        {
-          "option": "lzma",
-          "status": "enable"
-        },
-        {
-          "option": "zlib",
-          "status": "enable"
-        },
-        {
-          "option": "dxva2",
-          "status": "enable"
-        },
-        {
-          "option": "d3d11va",
-          "status": "enable"
-        },
-        {
-          "option": "d3d12va",
-          "status": "enable"
-        },
-        {
-          "option": "debug",
-          "status": "disable"
-        },
-        {
-          "option": "libdrm",
-          "status": "disable"
-        },
-        {
-          "option": "w32threads",
-          "status": "disable"
-        },
-        {
-          "option": "autodetect",
-          "status": "disable"
-        },
-        {
-          "option": "manpages",
-          "status": "disable"
-        },
-        {
-          "option": "podpages",
-          "status": "disable"
-        },
-        {
-          "option": "txtpages",
-          "status": "disable"
-        }
+      {
+        "option": "gpl",
+        "status": "enable"
+      },
+      {
+        "option": "version3",
+        "status": "enable"
+      },
+      {
+        "option": "pic",
+        "status": "enable"
+      },
+      {
+        "option": "pthreads",
+        "status": "enable"
+      },
+      {
+        "option": "iconv",
+        "status": "enable"
+      },
+      {
+        "option": "libxml2",
+        "status": "enable"
+      },
+      {
+        "option": "bzlib",
+        "status": "enable"
+      },
+      {
+        "option": "lzma",
+        "status": "enable"
+      },
+      {
+        "option": "zlib",
+        "status": "enable"
+      },
+      {
+        "option": "dxva2",
+        "status": "enable"
+      },
+      {
+        "option": "d3d11va",
+        "status": "enable"
+      },
+      {
+        "option": "d3d12va",
+        "status": "enable"
+      },
+      {
+        "option": "debug",
+        "status": "disable"
+      },
+      {
+        "option": "libdrm",
+        "status": "disable"
+      },
+      {
+        "option": "w32threads",
+        "status": "disable"
+      },
+      {
+        "option": "autodetect",
+        "status": "disable"
+      },
+      {
+        "option": "manpages",
+        "status": "disable"
+      },
+      {
+        "option": "podpages",
+        "status": "disable"
+      },
+      {
+        "option": "txtpages",
+        "status": "disable"
+      }
     ],
     "standard": {
       "base": [
@@ -85,15 +84,18 @@
           "option": "gnutls",
           "package": "gnutls",
           "version": "7"
-        }, {
+        },
+        {
           "option": "gmp",
           "package": "gmp",
           "version": "7"
-        }, {
+        },
+        {
           "option": "amf",
           "package": "amf-headers",
           "version": "7"
-        }, {
+        },
+        {
           "option": "vaapi",
           "package": "libva",
           "version": "7"
@@ -106,103 +108,128 @@
           "option": "libaom",
           "package": "aom",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libfribidi",
           "package": "fribidi",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libgme",
           "package": "libgme",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libgsm",
           "package": "gsm",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libmp3lame",
           "package": "lame",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libopencore-amrnb",
           "package": "opencore-amr",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libopencore-amrwb",
           "package": "opencore-amr",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libopenjpeg",
           "package": "openjpeg2",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libopenmpt",
           "package": "libopenmpt",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libopus",
           "package": "opus",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libspeex",
           "package": "speex",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libsrt",
           "package": "srt",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libtheora",
           "package": "libtheora",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libvo-amrwbenc",
           "package": "vo-amrwbenc",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libvorbis",
           "package": "libvorbis",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libvpx",
           "package": "libvpx",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libwebp",
           "package": "libwebp",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libx264",
           "package": "libx264",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libx265",
           "package": "x265",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libxvid",
           "package": "xvidcore",
           "version": "7"
-        }, {
+        },
+        {
           "option": "sdl2",
           "package": "SDL2",
           "version": "7"
-        }, {
+        },
+        {
           "option": "nvenc",
           "package": "ffnvcodec-headers",
           "version": "9"
-        }, {
+        },
+        {
           "option": "nvdec",
           "package": "ffnvcodec-headers",
           "version": "9"
-        }, {
+        },
+        {
           "option": "cuda-llvm",
           "package": "ffnvcodec-headers",
           "version": "9"
-        }, {
+        },
+        {
           "option": "cuvid",
           "package": "ffnvcodec-headers",
           "version": "9"
-        }, {
+        },
+        {
           "option": "ffnvcodec",
           "package": "ffnvcodec-headers",
           "version": "9"
@@ -295,83 +322,103 @@
           "option": "frei0r",
           "package": "frei0r-plugins",
           "version": "7"
-        }, {
+        },
+        {
           "option": "ladspa",
           "package": "ladspa-sdk",
           "version": "7"
-        }, {
+        },
+        {
           "option": "ladspa",
           "package": "dlfcn",
           "version": "7"
-        }, {
+        },
+        {
           "option": "lcms2",
           "package": "lcms2",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libbs2b",
           "package": "libbs2b",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libcdio",
           "package": "libcdio",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libcdio",
           "package": "libcdio-paranoia",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libdav1d",
           "package": "dav1d",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libdvdnav",
           "package": "libdvdnav",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libdvdread",
           "package": "libdvdread",
           "version": "7"
-        }, {
+        },
+        {
           "option": "liblc3",
           "package": "liblc3",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libmysofa",
           "package": "libmysofa",
           "version": "7"
-        }, {
+        },
+        {
           "option": "librav1e",
           "package": "rav1e",
           "version": "7"
-        }, {
+        },
+        {
           "option": "librist",
           "package": "librist",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libshine",
           "package": "shine",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libsnappy",
           "package": "snappy",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libsvtav1",
           "package": "svt-av1",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libtwolame",
           "package": "twolame",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libzvbi",
           "package": "zvbi",
           "version": "7"
-        }, {
+        },
+        {
           "option": "liboapv",
           "package": "openapv",
           "version": "8"
-        }, {
+        },
+        {
           "option": "vulkan",
           "package": "spirv-headers",
           "version": "7"
@@ -382,78 +429,96 @@
           "option": "libaribb24",
           "package": "aribb24",
           "version": "7"
-        }, {
+        },
+        {
           "option": "chromaprint",
           "package": "chromaprint",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libcodec2",
           "package": "codec2",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libkvazaar",
           "package": "kvazaar",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libaribcaption",
           "package": "libaribcaption",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libbluray",
           "package": "libbluray",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libilbc",
           "package": "libilbc",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libjxl",
           "package": "libjxl",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libmodplug",
           "package": "libmodplug",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libplacebo",
           "package": "libplacebo",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libsoxr",
           "package": "libsoxr",
           "version": "7"
-        }, {
+        },
+        {
           "option": "opencl",
           "package": "opencl-icd",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libqrencode",
           "package": "qrencode",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libshaderc",
           "package": "shaderc",
           "version": "7",
           "max": "8.1",
           "daily": "false"
-        }, {
+        },
+        {
           "option": "libvvenc",
           "package": "libvvenc",
           "custom": "true",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libxevd",
           "package": "xevd",
           "version": "7"
-        }, {
+        },
+        {
           "option": "libxeve",
           "package": "xeve",
           "version": "7"
-        }, {
+        },
+        {
           "option": "vulkan",
           "package": "vulkan-loader",
           "version": "7"
-        }, {
+        },
+        {
           "option": "whisper",
           "package": "whisper.cpp",
           "version": "8"
@@ -464,7 +529,8 @@
           "option": "libcaca",
           "package": "libcaca",
           "version": "7"
-        }, {
+        },
+        {
           "option": "cairo",
           "package": "cairo",
           "version": "8.1"
