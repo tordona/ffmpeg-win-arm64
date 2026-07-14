@@ -8,9 +8,9 @@ ffmpeg_lib_options="$(jq -r \
     .options.standard[], .options.essentials[] 
     | .[] 
     | select(
-        .version <= $version and 
-        (if has("max") then $version <= .max else true end) and
-        (if $is_daily_build and has("daily") then false else true end)
+        .version.min <= $version and 
+        (if (.version | has("max")) then $version <= .version.max else true end) and
+        (if $is_daily_build and has("daily") then (.daily | ascii_downcase) == "true" else true end)
       ) 
     | "--enable-" + .option
   ] 
@@ -25,9 +25,9 @@ if [[ "${build_type}" == "full" ]]; then
       .options.full[] 
       | .[] 
       | select(
-          .version <= $version and 
-          (if has("max") then $version <= .max else true end) and
-          (if $is_daily_build and has("daily") then false else true end)
+          .version.min <= $version and 
+          (if (.version | has("max")) then $version <= .version.max else true end) and
+          (if $is_daily_build and has("daily") then (.daily | ascii_downcase) == "true" else true end)
         ) 
       | "--enable-" + .option
     ] 
@@ -35,3 +35,11 @@ if [[ "${build_type}" == "full" ]]; then
   ' ../config/options.json)"
 fi
 echo "${build_config} ${generic_options} ${ffmpeg_lib_options}" | xargs ./configure
+# declare -a verified_lib_options=()
+# for option in $generic_options $full_lib_options; do
+#   flag="${option#--*able}"
+#   if grep -Eq -- "  --(enable|disable)$flag" "configure"; then
+#       verified_lib_options+=("$option")
+#   fi
+# done
+# echo "${build_config} ${verified_lib_options[@]}" | xargs ./configure

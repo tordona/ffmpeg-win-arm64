@@ -162,11 +162,30 @@ jobs:
       if: ${{ matrix.build_type == 'essentials' }}
       working-directory: ./config
       env:
+        release_tag: "${{ needs.defaults.outputs.release_tag }}"
         target_version: ${{ needs.defaults.outputs.target_version }}
         package_prefix: ${{ needs.defaults.outputs.package_prefix }}
       run: |
         echo "📢 Install required library packages - Essentials Build"
-        packages=$(jq -r --arg version "$target_version" --arg prefix "$package_prefix" '[.options.standard[], .options.essentials[] | .[] | select(.version <= $version and .custom != "true") | $prefix + "-" +.package] | sort_by(ascii_downcase) | join(" ")' options.json)
+        is_daily_build=$([[ "$release_tag" == *"daily-autobuild"* ]] && echo "true" || echo "false")
+        packages=$(jq -r \
+          --arg version "$target_version" \
+          --arg prefix "$package_prefix" \
+          --argjson is_daily_build "$is_daily_build" '
+          [
+            .options.standard[], .options.essentials[] 
+            | .[] 
+            | select(
+                .version.min <= $version and 
+                (if (.version | has("max")) then $version <= .version.max else true end) and
+                (if $is_daily_build and has("daily") then (.daily | ascii_downcase) == "true" else true end) and
+                .custom != "true"
+              ) 
+            | $prefix + "-" + .package
+          ] 
+          | sort_by(ascii_downcase) 
+          | join(" ")
+        ' options.json)
         pacman -S --disable-download-timeout --noconfirm --overwrite '*' $packages
         echo "packages=$packages" >> "$GITHUB_OUTPUT"
     - name: '📦 Install Packages - Full Build'
@@ -174,11 +193,30 @@ jobs:
       if: ${{ matrix.build_type == 'full' }}
       working-directory: ./config
       env:
+        release_tag: "${{ needs.defaults.outputs.release_tag }}"
         target_version: ${{ needs.defaults.outputs.target_version }}
         package_prefix: ${{ needs.defaults.outputs.package_prefix }}
       run: |
         echo "📢 Install required library packages - Full Build"
-        packages=$(jq -r --arg version "$target_version" --arg prefix "$package_prefix" '[.options.standard[], .options.essentials[], .options.full[] | .[] | select(.version <= $version and .custom != "true") | $prefix + "-" +.package] | sort_by(ascii_downcase) | join(" ")' options.json)
+        is_daily_build=$([[ "$release_tag" == *"daily-autobuild"* ]] && echo "true" || echo "false")
+        packages=$(jq -r \
+          --arg version "$target_version" \
+          --arg prefix "$package_prefix" \
+          --argjson is_daily_build "$is_daily_build" '
+          [
+            .options.standard[], .options.essentials[], .options.full[] 
+            | .[] 
+            | select(
+                .version.min <= $version and 
+                (if (.version | has("max")) then $version <= .version.max else true end) and
+                (if $is_daily_build and has("daily") then (.daily | ascii_downcase) == "true" else true end) and
+                .custom != "true"
+              ) 
+            | $prefix + "-" + .package
+          ] 
+          | sort_by(ascii_downcase) 
+          | join(" ")
+        ' options.json)
         pacman -S --disable-download-timeout --noconfirm --overwrite '*' $packages
         echo "packages=$packages" >> "$GITHUB_OUTPUT"
     - name: '⬇️ Download External Packages'
