@@ -690,7 +690,8 @@
           "option": "whisper",
           "package": "whisper.cpp",
           "version": {
-            "min": "8"
+            "min": "8",
+            "max": "8.1"
           }
         }
       ],
