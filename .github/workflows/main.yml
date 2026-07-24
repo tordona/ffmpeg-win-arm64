@@ -186,6 +186,7 @@ jobs:
           | sort_by(ascii_downcase) 
           | join(" ")
         ' options.json)
+        echo "📢 $packages"
         pacman -S --disable-download-timeout --noconfirm --overwrite '*' $packages
         echo "packages=$packages" >> "$GITHUB_OUTPUT"
     - name: '📦 Install Packages - Full Build'
@@ -217,6 +218,7 @@ jobs:
           | sort_by(ascii_downcase) 
           | join(" ")
         ' options.json)
+        echo "📢 $packages"
         pacman -S --disable-download-timeout --noconfirm --overwrite '*' $packages
         echo "packages=$packages" >> "$GITHUB_OUTPUT"
     - name: '⬇️ Download External Packages'

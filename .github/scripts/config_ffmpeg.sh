@@ -34,6 +34,7 @@ if [[ "${build_type}" == "full" ]]; then
     | join(" ")
   ' ../config/options.json)"
 fi
+echo "📢 ${build_config} ${generic_options} ${ffmpeg_lib_options}"
 echo "${build_config} ${generic_options} ${ffmpeg_lib_options}" | xargs ./configure
 # declare -a verified_lib_options=()
 # for option in $generic_options $full_lib_options; do
