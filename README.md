@@ -12,7 +12,7 @@ FFmpeg builds for Windows on ARM (Qualcomm Snapdragon / ARM64)
 ## Stable Releases
 Stable releases are based on the last three major releases with minor and patch versions.
 
-* [FFmpeg v9.0](https://github.com/tordona/ffmpeg-win-arm64/releases/tag/9.0)
+* [FFmpeg v9.0.1](https://github.com/tordona/ffmpeg-win-arm64/releases/tag/9.0.1)
 * [FFmpeg v8.1.2](https://github.com/tordona/ffmpeg-win-arm64/releases/tag/8.1.2)
 * [FFmpeg v7.1.5](https://github.com/tordona/ffmpeg-win-arm64/releases/tag/7.1.5)
 
