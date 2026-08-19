@@ -3,9 +3,9 @@ echo "📢 Resource Edit FFmpeg FFplay FFprobe"
 product_version="$github_tag"
 file_version="$product_version"
 copyright="Copyright © 2000-$(date '+%Y') the FFmpeg developers"
-ffmpeg_desc="A command line tool to convert multimedia files between formats"
-ffplay_desc="A simple media player based on SDL and the FFmpeg libraries"
-ffprobe_desc="A simple multimedia stream analyzer"
+ffmpeg_desc="Tool to convert multimedia files between formats"
+ffplay_desc="Simple media player based on SDL and the FFmpeg libraries"
+ffprobe_desc="Simple multimedia stream analyzer"
 
 ff_progs=(
   "ffmpeg"
@@ -27,7 +27,7 @@ for ff in "${ff_progs[@]}"; do
   if [[ -n "$file" ]]; then
     product_prefix=${ff:0:2}
     product_suffix=${ff:2}
-    rcedit $file --set-version-string "FileDescription" "${!desc}"
+    rcedit $file --set-version-string "FileDescription" "${product_prefix^^}${product_suffix}"
     rcedit $file --set-file-version "${file_version}"
     rcedit $file --set-version-string "ProductName" "${product_prefix^^}${product_suffix}"
     rcedit $file --set-version-string "ProductVersion" "${product_version}"
