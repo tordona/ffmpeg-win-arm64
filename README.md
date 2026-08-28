@@ -34,16 +34,20 @@ Both variants include all internal components available for Windows. See the [Li
 ## Libraries
 
 ### Libraries in Essentials Build
-`avisynth  vapoursynth  libaom  libass  libfreetype  libfribidi  libharfbuzz  libgme  libgsm  libmp3lame  libopencore-amrnb  libopencore-amrwb  libopenjpeg  libopenmpt  libopus  librubberband  libspeex  libsrt  libssh  libtheora  libvidstab  libvmaf  libvo-amrwbenc  libvorbis  libvpx  libwebp  libx264  libx265  libxvid  libzimg  libzmq  mediafoundation  openal  sdl2`. 
+`
+avisynth vapoursynth libaom libass libfreetype libfribidi libharfbuzz libgme libgsm libmp3lame libopencore-amrnb libopencore-amrwb libopenjpeg libopenmpt libopus librubberband libspeex libsrt libssh libtheora libvidstab libvmaf libvo-amrwbenc libvorbis libvpx libwebp libx264 libx265 libxvid libzimg libzmq mediafoundation openal sdl2
+` 
 
-### Additional Libraries in Full Build  
+### Additional Libraries in Full Build 
 `
-cairo chromaprint  frei0r  ladspa  lcms2  libaribb24  libaribcaption  libbluray  libbs2b  libcaca  libcdio  libcodec2  libdav1d  libdvdnav  libdvdread  libilbc  libjxl  liblc3  libmodplug  libmysofa liboapv libplacebo  libqrencode  librav1e  librist  libshaderc  libshine  libsnappy  libsoxr  libsvtav1  libtwolame  libxevd  libxeve  libzvbi  opencl  vulkan  whisper
+cairo chromaprint frei0r ladspa lcms2 libaribb24 libaribcaption libbluray libbs2b libcaca libcdio libcodec2 libdav1d libdvdnav libdvdread libilbc libjxl liblc3 libmodplug libmysofa liboapv libplacebo libqrencode librav1e librist libshaderc libshine libsnappy libsoxr libsvtav1 libtwolame libxevd libxeve libzvbi opencl vulkan
 `
+
 ### Libraries Not Yet Supported 
 `
 libdavs2 libflite liblensfun libquirc libuavs3d libxavs2
 `
+
 ### Hardware-Support Libraries (All Builds)
 `
 amf cuda cuvid d3d11va d3d12va dxva2 nvdec nvenc vaapi
