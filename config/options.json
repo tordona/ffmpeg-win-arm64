@@ -500,13 +500,6 @@
           }
         },
         {
-          "option": "librist",
-          "package": "librist",
-          "version": {
-            "min": "7"
-          }
-        },
-        {
           "option": "libshine",
           "package": "shine",
           "version": {
