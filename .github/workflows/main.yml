@@ -302,11 +302,11 @@ jobs:
       working-directory: ./source
       run: |
         make install -j$(nproc)
-    - name: '🏃 Run executable and verify success'
+    - name: '🏃 Run Executable and Verify Help Output'
       shell: pwsh
-      working-directory: ./source
+      working-directory: ${{ steps.ffmpeg-config-setup.outputs.output_path }}/${{ steps.ffmpeg-config-setup.outputs.version_name }}/bin
       run: |
-        & "./ffmpeg.exe" "-hide_banner" "-help"
+        & ".\ffmpeg.exe" -hide_banner -help
         if ($LASTEXITCODE -ne 0) {
           Write-Error "ffmpeg.exe failed with exit code $LASTEXITCODE"
           exit $LASTEXITCODE
