@@ -70,7 +70,12 @@ jobs:
     - name: '🔨 Create New Package Release'
       if: steps.check-build-release.outputs.release-exists == 'false'
       working-directory: ./releases
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        retry_max_attempts=5
+        retry_attempt=1
+        retry_delay=10
         draft_flag=""
         if [[ "${{ inputs.release_tag }}" != *"autobuild"* && 
               "${{ github.event_name }}" == "workflow_dispatch" ]]; then
@@ -81,13 +86,57 @@ jobs:
         if [[ -n "$recently_updated" ]]; then
           notes=$recently_updated
         fi
+
         echo "📢 Create New Package Release"
-        gh release create "${{ inputs.release_tag }}" \
-          '*.7z' \
-          '*.sha256' \
-          --title '${{ inputs.release_tag }}' \
-          --notes-file $notes \
-          $draft_flag
+        while [ $retry_attempt -le $retry_max_attempts ]; do
+          echo "Attempt $retry_attempt of $retry_max_attempts: Creating release..."
+
+          # Run gh release create
+          if gh release create "${{ inputs.release_tag }}" \
+              '*.7z' \
+              '*.sha256' \
+              --title '${{ inputs.release_tag }}' \
+              --notes-file "$notes" \
+              $draft_flag; then
+            echo "Release created successfully on attempt $retry_attempt."
+            exit 0
+          fi
+
+          echo "::warning::Attempt $retry_attempt failed."
+
+          if [ $retry_attempt -lt $retry_max_attempts ]; then
+            echo "Waiting ${retry_delay}s before retrying..."
+            sleep $retry_delay
+            # Exponential backoff (10s -> 20s -> 40s -> 80s)
+            retry_delay=$((retry_delay * 2))
+          fi
+
+          retry_attempt=$((retry_attempt + 1))
+        done
+
+        echo "::error::Failed to create release after $retry_max_attempts attempts."
+        exit 1
+    # - name: '🔨 Create New Package Release'
+    #   if: steps.check-build-release.outputs.release-exists == 'false'
+    #   working-directory: ./releases
+    #   run: |
+    #     draft_flag=""
+    #     if [[ "${{ inputs.release_tag }}" != *"autobuild"* && 
+    #           "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+    #       draft_flag="--draft"
+    #     fi
+    #     notes=$(find . -name "release_notes.md" -print -quit)
+    #     recently_updated=$(find . -name "latest.md" -print -quit)
+    #     if [[ -n "$recently_updated" ]]; then
+    #       notes=$recently_updated
+    #     fi
+    #     echo "📢 Create New Package Release"
+    #     gh release create "${{ inputs.release_tag }}" \
+    #       '*.7z' \
+    #       '*.sha256' \
+    #       --title '${{ inputs.release_tag }}' \
+    #       --notes-file $notes \
+    #       $draft_flag
     - name: '🔍 Get Repo Latest Tag'
       if: ${{ contains(inputs.release_tag, 'daily-autobuild') }}
       id: 'latest-release-tag-name'
