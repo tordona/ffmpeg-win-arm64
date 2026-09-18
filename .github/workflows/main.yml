@@ -302,6 +302,16 @@ jobs:
       working-directory: ./source
       run: |
         make install -j$(nproc)
+    - name: '🏃 Run executable and verify success'
+      shell: pwsh
+      working-directory: ./source
+      run: |
+        & "./ffmpeg.exe" --arg1 "-hide_banner"
+        
+        if ($LASTEXITCODE -ne 0) {
+          Write-Error "ffmpeg.exe failed with exit code $LASTEXITCODE"
+          exit $LASTEXITCODE
+        }
     - name: '🔦 Parse Library Versions'
       env:
         output_path: "${{ steps.ffmpeg-config-setup.outputs.output_path }}"
