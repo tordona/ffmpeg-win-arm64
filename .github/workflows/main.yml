@@ -304,9 +304,15 @@ jobs:
         make install -j$(nproc)
     - name: '🏃 Run Executable and Verify Help Output'
       shell: pwsh
-      working-directory: ${{ steps.ffmpeg-config-setup.outputs.output_path }}/${{ steps.ffmpeg-config-setup.outputs.version_name }}/bin
+      env:
+        output_path: ${{ steps.ffmpeg-config-setup.outputs.output_path }}
+        version_name: ${{ steps.ffmpeg-config-setup.outputs.version_name }}
       run: |
-        & ".\ffmpeg.exe" -hide_banner -help
+        $bash_path = "$env:output_path/$env:version_name/bin"
+        $win_path = $bash_path -replace '^/([a-zA-Z])/', '$1:/'
+        Set-Location $win_path
+
+        & .\ffmpeg.exe -hide_banner -help
         if ($LASTEXITCODE -ne 0) {
           Write-Error "ffmpeg.exe failed with exit code $LASTEXITCODE"
           exit $LASTEXITCODE
