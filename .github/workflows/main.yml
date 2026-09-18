@@ -306,8 +306,7 @@ jobs:
       shell: pwsh
       working-directory: ./source
       run: |
-        & "./ffmpeg.exe" --arg1 "-hide_banner"
-        
+        & "./ffmpeg.exe" "-hide_banner" "-help"
         if ($LASTEXITCODE -ne 0) {
           Write-Error "ffmpeg.exe failed with exit code $LASTEXITCODE"
           exit $LASTEXITCODE
