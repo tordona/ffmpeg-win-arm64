@@ -105,7 +105,8 @@
           "option": "vaapi",
           "package": "libva",
           "version": {
-            "min": "7"
+            "min": "7",
+            "max": "8.1"
           }
         }
       ]
