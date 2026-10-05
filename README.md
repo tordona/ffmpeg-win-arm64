@@ -50,7 +50,7 @@ libdavs2 libflite liblensfun libquirc libuavs3d libxavs2
 
 ### Hardware-Support Libraries (All Builds)
 `
-amf cuda cuvid d3d11va d3d12va dxva2 nvdec nvenc vaapi
+amf cuda cuvid d3d11va d3d12va dxva2 nvdec nvenc
 `
 
 ## Library Versions
