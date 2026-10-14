@@ -142,6 +142,9 @@ jobs:
           sed -i '1i libdir=${exec_prefix}/lib' "$pkgconfig"
           sed -i '1i exec_prefix=${prefix}' "$pkgconfig"
           sed -i '1i prefix=${pcfiledir}/../..' "$pkgconfig"
+          sed -i 's|LC:/a/_temp/msys64/clangarm64/lib/|l|g' "$pkgconfig"
+          sed -i 's|-L/clangarm64/lib||g' "$pkgconfig"
+          sed -i 's/  */ /g' "$pkgconfig"
         done
     - name: '🚐 Move .lib Files'
       working-directory: ./builds
