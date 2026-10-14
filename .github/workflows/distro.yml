@@ -128,12 +128,35 @@ jobs:
     - name: '🧹 Cleanup Files for Distribution'
       working-directory: ./builds
       run: |
-        find . -type d -iname "dump" -exec rm -r {} +
         find . -type d -iname "examples" -exec rm -r {} +
-        find . -type f -iname '*.lib' -delete
         find . -type f -iname '*.xsd' -delete
         find . -type f -iname '*.ico' -delete
         find . -type f -iname '*.md' -delete
+    - name: '🧹 Cleanup .pc Files'
+      working-directory: ./builds
+      run: |
+        echo "📢 Cleanup pkgconfig files"
+        find . -type f -name "*.pc" | while IFS= read -r pkgconfig; do
+          sed -i '1,4d' "$pkgconfig"
+          sed -i '1i includedir=${prefix}/include' "$pkgconfig"
+          sed -i '1i libdir=${exec_prefix}/lib' "$pkgconfig"
+          sed -i '1i exec_prefix=${prefix}' "$pkgconfig"
+          sed -i '1i prefix=${pcfiledir}/../..' "$pkgconfig"
+        done
+    - name: '🚐 Move .lib Files'
+      working-directory: ./builds
+      run: |
+        echo "📢 Move .lib files to lib directory"
+        find . -type f -name "*.lib" | while IFS= read -r libfile; do
+          current_dir="$(dirname "$libfile")"
+          parent_dir="$(dirname "$current_dir")"
+          target_dir="$parent_dir/lib"
+          if [ "$current_dir" = "$target_dir" ]; then
+            continue
+          fi
+          mkdir -p "$target_dir"
+          mv "$libfile" "$target_dir/"
+        done
     - name: '🚚 Package for Distribution'
       shell: bash
       run: |

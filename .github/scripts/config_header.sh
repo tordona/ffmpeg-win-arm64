@@ -11,8 +11,6 @@ if [[ -f "$config_file" ]]; then
   sed -i "s|\s--datadir=$output_path\/$version_name\/presets||gI" $config_file
   sed -i "s|\s--prefix=$output_path\/$version_name||gI" $config_file
   sed -i "s|\s--docdir=$output_path\/$version_name\/docs||gI" $config_file
-  sed -i "s|\s--libdir=$output_path\/dump\/libs||gI" $config_file
-  sed -i "s|\s--incdir=$output_path\/dump\/include||gI" $config_file
   echo "📢"
   echo "$(head -n 25 $config_file)"
   echo ""

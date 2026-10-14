@@ -118,7 +118,5 @@ runs:
       temp_config+=" --prefix=${{ steps.output-path.outputs.output_path }}/${{ steps.version-name.outputs.version_name }}"
       temp_config+=" --datadir=${{ steps.output-path.outputs.output_path }}/${{ steps.version-name.outputs.version_name }}/presets"
       temp_config+=" --docdir=${{ steps.output-path.outputs.output_path }}/${{ steps.version-name.outputs.version_name }}/docs"
-      temp_config+=" --libdir=${{ steps.output-path.outputs.output_path }}/dump/libs"
-      temp_config+=" --incdir=${{ steps.output-path.outputs.output_path }}/dump/include"
       echo "📢 temp_config: $temp_config"
       echo "build_config=${temp_config}" >> $GITHUB_OUTPUT
