@@ -222,9 +222,16 @@ jobs:
         pacman -S --disable-download-timeout --noconfirm --overwrite '*' $packages
         echo "packages=$packages" >> "$GITHUB_OUTPUT"
     - name: '⬇️ Download External Packages'
-      run: |
-       mkdir packages
-       gh release download "${{ env.msys_toolchain }}-${{ needs.defaults.outputs.arch }}" --pattern "*.zst" --pattern "*.sig" -D "./packages" -R tordona/mingw-packages
+      uses: nick-fields/retry@v3
+      with:
+        timeout_minutes: 5
+        max_attempts: 4
+        retry_wait_seconds: 10
+        retry_on: error
+        command: |
+          mkdir -p packages
+          rm -rf ./packages/*
+          gh release download "${{ env.msys_toolchain }}-${{ needs.defaults.outputs.arch }}" --pattern "*.zst" --pattern "*.sig" -D "./packages" --clobber -R tordona/mingw-packages
     - name: '➡️ Install External Packages'
       run: |
         echo "📢 Install Custom Packages from External Repo"
