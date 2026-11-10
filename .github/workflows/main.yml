@@ -237,6 +237,16 @@ jobs:
         echo "📢 Install Custom Packages from External Repo"
         cd packages
         pacman -U --disable-download-timeout --overwrite '*' --noconfirm *.pkg.tar.zst
+    - name: '➡️ Install SDL2'
+      env:
+        package_prefix: ${{ needs.defaults.outputs.package_prefix }}
+      run: |
+        echo "📢 Force Install SDL2"
+        # mingw-w64-sdl2-compat does not and can not provide a static lib
+        # force revert to the mingw-w64-SDL2 package
+        # this may break soon again as msys team renames SDL2 to sdl2
+        pacman -Rdd --noconfirm $package_prefix-sdl2-compat
+        pacman -S --nodeps --noconfirm $package_prefix-SDL2
     - name: '🏃 FFmpeg Nvidia Headers'
       env:
         target_version: ${{ needs.defaults.outputs.target_version }}
