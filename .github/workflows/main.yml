@@ -110,6 +110,7 @@ jobs:
             git
             make
         pacboy:
+            pkgconf:p
             toolchain:p
             gcc-compat:p
             diffutils:p
